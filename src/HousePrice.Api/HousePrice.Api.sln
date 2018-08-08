@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousePrice.Api.Services", "HousePrice.Api.Services\HousePrice.Api.Services.csproj", "{62A838F9-08BA-4615-91C1-E44DA0F25754}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousePrice.Api.Cli", "HousePrice.Api.Cli\HousePrice.Api.Cli.csproj", "{F237AB22-F48B-472B-889A-385FE3DD4164}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62A838F9-08BA-4615-91C1-E44DA0F25754}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62A838F9-08BA-4615-91C1-E44DA0F25754}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62A838F9-08BA-4615-91C1-E44DA0F25754}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62A838F9-08BA-4615-91C1-E44DA0F25754}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F237AB22-F48B-472B-889A-385FE3DD4164}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F237AB22-F48B-472B-889A-385FE3DD4164}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F237AB22-F48B-472B-889A-385FE3DD4164}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F237AB22-F48B-472B-889A-385FE3DD4164}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
