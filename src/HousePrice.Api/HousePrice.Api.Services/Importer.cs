@@ -83,7 +83,7 @@ namespace HousePrice.Api.Services
     {
         [BsonId]
         public string TransactionId { get; set; }
-        public decimal Price { get; set; }
+        public double Price { get; set; }
         public DateTime TransferDate { get; set; }
         public string Postcode { get; set; }
         public string PropertyType { get; set; }
@@ -135,9 +135,9 @@ namespace HousePrice.Api.Services
 
                     csvReader.Configuration.HasHeaderRecord = false;
                     csvReader.Configuration.RegisterClassMap<HousePriceMap>();
-                    var client = new MongoClient("mongodb://localhost:32773");
+                    var client = new MongoClient("mongodb://localhost:32768");
                     var database = client.GetDatabase("HousePrice");
-               //     database.DropCollection("Transactions");
+                    //database.DropCollection("Transactions");
                     var collection = database.GetCollection<HousePrice>("Transactions");
 			
                     var batch = new List<HousePrice>();
