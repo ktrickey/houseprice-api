@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using CsvHelper.Configuration;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
+using Polly;
 
 namespace HousePrice.Api.Services
 {
@@ -32,24 +33,58 @@ namespace HousePrice.Api.Services
         }
 
         private static Dictionary<string, PostcodeData> postcodeLookup;
+        private static bool lookupComplete = false;
+
         static PostcodeLookup()
         {
-            using (var streamReader = new StreamReader(new FileStream(@"c:\mongo\ukpostcodes.csv", FileMode.Open, FileAccess.Read)))
+            Task.Run(() =>
             {
-                using (var csvReader = new CsvHelper.CsvReader(streamReader))
+                using (var streamReader =
+                    new StreamReader(new FileStream(@"c:\mongo\ukpostcodes.csv", FileMode.Open, FileAccess.Read)))
                 {
-                    csvReader.Configuration.BufferSize = 65536;
-                    var recs = csvReader.GetRecords<PostcodeData>();
-                    postcodeLookup = recs.ToDictionary(p => p.Postcode);
-  
+                    using (var csvReader = new CsvHelper.CsvReader(streamReader))
+                    {
+                        csvReader.Configuration.BufferSize = 131072;
+                        var recs = csvReader.GetRecords<PostcodeData>();
+                        var timer = Stopwatch.StartNew();
+                        postcodeLookup = recs.ToDictionary(p => p.Postcode);
+                        lookupComplete = true;
+                        timer.Stop();
+                        Console.WriteLine(timer.ElapsedMilliseconds);
+
+                    }
                 }
-            }
+            });
+//          using (var fileStream = new FileStream(@"c:\mongo\ukpostcodes.csv", FileMode.Open, FileAccess.Read))
+//            {
+//                using (var memoryStream = new MemoryStream())
+//                {
+//                    fileStream.CopyTo(memoryStream);
+//                    memoryStream.Seek(0, SeekOrigin.Begin);
+//                    using (var streamReader =
+//                        new StreamReader(memoryStream))
+//                    {
+//                        using (var csvReader = new CsvHelper.CsvReader(streamReader))
+//                        {
+//                           // csvReader.Configuration.BufferSize = 65536;
+//                            var recs = csvReader.GetRecords<PostcodeData>();
+//                            var timer = Stopwatch.StartNew();
+//                            postcodeLookup    = recs.ToDictionary(p => p.Postcode);
+//                            timer.Stop();
+//                            Console.WriteLine(timer.ElapsedMilliseconds);
+//
+//                        }
+//                    }
+//                }
+//           }
         }
 
         public static PostcodeData GetByPostcode(string postcode)
         {
+            while (!lookupComplete){};
+
             var found = postcodeLookup.TryGetValue(postcode, out PostcodeData postcodeData);
-            return found? postcodeData:null;
+            return found ? postcodeData:null;
         }
     }
 
