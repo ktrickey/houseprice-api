@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using CsvHelper.Configuration;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
+using MongoDB.Driver.GeoJsonObjectModel;
 using Polly;
 
 namespace HousePrice.Api.Services
@@ -35,6 +36,8 @@ namespace HousePrice.Api.Services
         private static Dictionary<string, PostcodeData> postcodeLookup;
         private static bool lookupComplete = false;
 
+        public static bool IsReady => lookupComplete;
+
         static PostcodeLookup()
         {
             Task.Run(() =>
@@ -55,28 +58,6 @@ namespace HousePrice.Api.Services
                     }
                 }
             });
-//          using (var fileStream = new FileStream(@"c:\mongo\ukpostcodes.csv", FileMode.Open, FileAccess.Read))
-//            {
-//                using (var memoryStream = new MemoryStream())
-//                {
-//                    fileStream.CopyTo(memoryStream);
-//                    memoryStream.Seek(0, SeekOrigin.Begin);
-//                    using (var streamReader =
-//                        new StreamReader(memoryStream))
-//                    {
-//                        using (var csvReader = new CsvHelper.CsvReader(streamReader))
-//                        {
-//                           // csvReader.Configuration.BufferSize = 65536;
-//                            var recs = csvReader.GetRecords<PostcodeData>();
-//                            var timer = Stopwatch.StartNew();
-//                            postcodeLookup    = recs.ToDictionary(p => p.Postcode);
-//                            timer.Stop();
-//                            Console.WriteLine(timer.ElapsedMilliseconds);
-//
-//                        }
-//                    }
-//                }
-//           }
         }
 
         public static PostcodeData GetByPostcode(string postcode)
@@ -114,7 +95,7 @@ namespace HousePrice.Api.Services
         public string Type => "Point";
 
     }
-    internal class HousePrice
+    public class HousePrice
     {
         [BsonId]
         public string TransactionId { get; set; }
@@ -159,7 +140,13 @@ namespace HousePrice.Api.Services
             Map( m => m.Status ).Index(15);
         }
     }
-    public class Importer
+
+    public interface IImporter
+    {
+        Task Import(Stream csvStream);
+    }
+
+    public class Importer : IImporter
     {
         public async Task Import(Stream csvStream)
         {
@@ -174,7 +161,7 @@ namespace HousePrice.Api.Services
                     var database = client.GetDatabase("HousePrice");
                     //database.DropCollection("Transactions");
                     var collection = database.GetCollection<HousePrice>("Transactions");
-			
+
                     var batch = new List<HousePrice>();
 
                     while (csvReader.Read())
@@ -182,25 +169,22 @@ namespace HousePrice.Api.Services
                         var record = csvReader.GetRecord<HousePrice>();
                         record.Postcode = record.Postcode.Replace(" ", String.Empty);
                         var locationData = PostcodeLookup.GetByPostcode(record.Postcode);
-                        record.Location = locationData?.Latitude!=null && locationData?.Longitude!=null?new Location(locationData?.Latitude, locationData?.Longitude): null;
+                        record.Location = locationData?.Latitude != null && locationData?.Longitude != null
+                            ? new Location(locationData?.Latitude, locationData?.Longitude)
+                            : null;
                         batch.Add(record);
-                        
+
                         if (batch.Count == 1000)
                         {
                             await collection.InsertManyAsync(batch);
                             batch.Clear();
                         }
 
-          
+
                     }
+
                     await collection.InsertManyAsync(batch);
 
-                                     
-//                    
-//                    var housePriceBuilder = Builders<HousePrice>.IndexKeys;
-//                    var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Geo2DSphere(x=>x.Location));
-//                    await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
-   
                 }
             }
         }
@@ -215,6 +199,20 @@ namespace HousePrice.Api.Services
                                 var housePriceBuilder = Builders<HousePrice>.IndexKeys;
                     var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Geo2DSphere(x=>x.Location));
                     await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
+        }
+
+        public void GetMatches(string postcode, double radius)
+        {
+            var client = new MongoClient("mongodb://localhost:32768");
+            var database = client.GetDatabase("HousePrice");
+            //     database.DropCollection("Transactions");
+            var collection = database.GetCollection<HousePrice>("Transactions");
+            var postcodeLocation = PostcodeLookup.GetByPostcode("CB233NY");
+            var builder = Builders<HousePrice>.Filter;
+            var filter = builder.NearSphere(x => x.Location, postcodeLocation.Longitude.Value, postcodeLocation.Latitude.Value, radius);
+
+            FindOptions<HousePrice> options = new FindOptions<HousePrice> { Limit = 25};
+            var stuff = collection.FindAsync(filter, options).ToListAsync();
         }
         
     }

@@ -25,6 +25,8 @@ namespace HousePrice.Api.Cli
 //           Task.WaitAll(tasks.ToArray());
 //           Console.WriteLine("Adding index");
 //           await importer.AddIndex();
+            
+            new Importer().GetMatches("CB233NY", 1);
         }
     }
 }
