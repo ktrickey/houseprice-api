@@ -57,7 +57,7 @@ namespace HousePrice.Api.Services
 		{
 			PopulateTask.Wait();
 
-			var found = postcodeLookup.TryGetValue(postcode, out PostcodeData postcodeData);
+			var found = postcodeLookup.TryGetValue(postcode.ToUpper().Replace(" ", string.Empty), out PostcodeData postcodeData);
 			return found ? postcodeData:null;
 		}
 	}

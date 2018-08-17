@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using HousePrice.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,22 +10,22 @@ namespace HousePrice.WebAPi.Controllers
     
     [Route("api/[controller]")]
     [ApiController]
-    public class HousePriceController : ControllerBase
+    public class TransactionController : ControllerBase
     {
         private readonly IImporter _importer;
         private readonly ILookup _lookup;
 
-        public HousePriceController(IImporter importer, ILookup lookup)
+        public TransactionController(IImporter importer, ILookup lookup)
         {
             _importer = importer;
             _lookup = lookup;
         }
-        [Route("postcode/{postcode}")]
+        [Route("{postcode}/{radius}")]
         // GET api/values/5
         [HttpGet]
-        public ActionResult<IEnumerable<Api.Services.HousePrice>> Get(string postcode)
+        public async Task<ActionResult<IEnumerable<Api.Services.HousePrice>>> Get(string postcode, double radius)
         {
-            return Ok(_lookup.GetLookups(postcode, 10));
+            return Ok(await _lookup.GetLookups(postcode, radius *1000));
         }
 
         // POST api/values
