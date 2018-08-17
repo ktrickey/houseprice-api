@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
 
@@ -43,13 +44,21 @@ namespace HousePrice.Api.Services
 				        var locationQuery =
 					        new FilterDefinitionBuilder<HousePrice>().NearSphere(tag => tag.Location, point,
 						        radius);
+				        var proj = Builders<HousePrice>.Projection.ToBsonDocument();
+						var sort = new SortDefinitionBuilder<HousePrice>().Descending(x=>x.TransferDate);
 						var options = new FindOptions<HousePrice>()
 						{
 							BatchSize = 25,
 							Skip = 0,
-							Limit = 25
+							Limit = 25,
+							Projection = proj,
+							Sort = sort
+
 						};
+				       
 				        var query = await activeCollection.FindAsync(locationQuery, options);
+
+				        
 
 				        return await query.ToListAsync();
 			        });
