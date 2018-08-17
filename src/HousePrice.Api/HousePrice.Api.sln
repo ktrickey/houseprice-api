@@ -1,10 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousePrice.Api.Services", "HousePrice.Api.Services\HousePrice.Api.Services.csproj", "{62A838F9-08BA-4615-91C1-E44DA0F25754}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HousePrice.Api.Services", "HousePrice.Api.Services\HousePrice.Api.Services.csproj", "{62A838F9-08BA-4615-91C1-E44DA0F25754}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousePrice.Api.Cli", "HousePrice.Api.Cli\HousePrice.Api.Cli.csproj", "{F237AB22-F48B-472B-889A-385FE3DD4164}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HousePrice.Api.Cli", "HousePrice.Api.Cli\HousePrice.Api.Cli.csproj", "{F237AB22-F48B-472B-889A-385FE3DD4164}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousePrice.WebAPi", "HousePrice.WebAPi\HousePrice.WebAPi.csproj", "{7F91B762-FAEC-48E6-B05E-E64DE7508EF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HousePrice.WebAPi", "HousePrice.WebAPi\HousePrice.WebAPi.csproj", "{7F91B762-FAEC-48E6-B05E-E64DE7508EF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousePrice.Api.ImportFileWatcher", "HousePrice.Api.ImportFileWatcher\HousePrice.Api.ImportFileWatcher.csproj", "{BF6B10A5-D288-447B-8644-628985172605}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +29,15 @@ Global
 		{7F91B762-FAEC-48E6-B05E-E64DE7508EF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F91B762-FAEC-48E6-B05E-E64DE7508EF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F91B762-FAEC-48E6-B05E-E64DE7508EF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF6B10A5-D288-447B-8644-628985172605}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF6B10A5-D288-447B-8644-628985172605}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF6B10A5-D288-447B-8644-628985172605}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF6B10A5-D288-447B-8644-628985172605}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BC74E650-CDBE-45CD-87B9-F889C294C562}
 	EndGlobalSection
 EndGlobal

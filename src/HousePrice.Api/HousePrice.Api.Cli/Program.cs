@@ -26,7 +26,7 @@ namespace HousePrice.Api.Cli
 //           Console.WriteLine("Adding index");
 //           await importer.AddIndex();
             
-            new Importer().GetMatches("CB233NY", 1);
+            var stuff = await new Lookup().GetLookups("CB233NY", 1000);
         }
     }
 }

@@ -60,7 +60,7 @@ namespace HousePrice.Api.Services
             });
         }
 
-        public static PostcodeData GetByPostcode(string postcode)
+        public static async Task<PostcodeData> GetByPostcode(string postcode)
         {
             while (!lookupComplete){};
 
@@ -168,7 +168,7 @@ namespace HousePrice.Api.Services
                     {
                         var record = csvReader.GetRecord<HousePrice>();
                         record.Postcode = record.Postcode.Replace(" ", String.Empty);
-                        var locationData = PostcodeLookup.GetByPostcode(record.Postcode);
+                        var locationData = await PostcodeLookup.GetByPostcode(record.Postcode);
                         record.Location = locationData?.Latitude != null && locationData?.Longitude != null
                             ? new Location(locationData?.Latitude, locationData?.Longitude)
                             : null;
@@ -203,16 +203,16 @@ namespace HousePrice.Api.Services
 
         public void GetMatches(string postcode, double radius)
         {
-            var client = new MongoClient("mongodb://localhost:32768");
-            var database = client.GetDatabase("HousePrice");
-            //     database.DropCollection("Transactions");
-            var collection = database.GetCollection<HousePrice>("Transactions");
-            var postcodeLocation = PostcodeLookup.GetByPostcode("CB233NY");
-            var builder = Builders<HousePrice>.Filter;
-            var filter = builder.NearSphere(x => x.Location, postcodeLocation.Longitude.Value, postcodeLocation.Latitude.Value, radius);
+            //var client = new MongoClient("mongodb://localhost:32768");
+            //var database = client.GetDatabase("HousePrice");
+            ////     database.DropCollection("Transactions");
+            //var collection = database.GetCollection<HousePrice>("Transactions");
+            //var postcodeLocation = PostcodeLookup.GetByPostcode("CB233NY");
+            //var builder = Builders<HousePrice>.Filter;
+            //var filter = builder.NearSphere(x => x.Location, postcodeLocation.Longitude.Value, postcodeLocation.Latitude.Value, radius);
 
-            FindOptions<HousePrice> options = new FindOptions<HousePrice> { Limit = 25};
-            var stuff = collection.FindAsync(filter, options).ToListAsync();
+            //FindOptions<HousePrice> options = new FindOptions<HousePrice> { Limit = 25};
+            //var stuff = collection.FindAsync(filter, options).ToListAsync();
         }
         
     }

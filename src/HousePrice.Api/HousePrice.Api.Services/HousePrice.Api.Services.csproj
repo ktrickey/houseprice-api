@@ -6,8 +6,15 @@
 
     <ItemGroup>
       <PackageReference Include="CsvHelper" Version="7.1.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
       <PackageReference Include="MongoDB.Driver" Version="2.7.0" />
       <PackageReference Include="Polly" Version="6.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.IdentityModel.Protocols">
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\dotnet\sdk\NuGetFallbackFolder\microsoft.identitymodel.protocols\5.2.0\lib\netstandard1.4\Microsoft.IdentityModel.Protocols.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

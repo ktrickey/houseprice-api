@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
@@ -15,41 +17,54 @@ namespace HousePrice.Api.Services
 
     public class Lookup : ILookup
     {
+	    private readonly MongoContext _mongoContext;
         public Lookup()
         {
-            
+			var builder = new ConfigurationBuilder()
+				.SetBasePath(Directory.GetCurrentDirectory())
+				.AddJsonFile("appsettings.json");
+
+			var configuration = builder.Build();
+
+			
+			_mongoContext = new MongoContext(configuration["connectionString"], "HousePrice");
         }
 
         public async Task<IEnumerable<HousePrice>> GetLookups(string postcode, double radius)
         {
-            var client = new MongoClient("mongodb://localhost:32768");
-            var database = client.GetDatabase("HousePrice");
-            var collection = database.GetCollection<HousePrice>("Transactions");
-            
 
-            FilterDefinition<HousePrice> filter = FilterDefinition<HousePrice>.Empty;
-            FindOptions<HousePrice> options = new FindOptions<HousePrice>
-            {
-                BatchSize = 25,
-                NoCursorTimeout = false
-            };
+            var postcodeInfo = await PostcodeLookup.GetByPostcode(postcode);
+	        if (postcodeInfo?.Longitude != null && postcodeInfo?.Latitude != null)
+	        {
+		        try
+		        {
+			        var point = GeoJson.Point(GeoJson.Geographic(postcodeInfo.Longitude.Value,
+				        postcodeInfo.Latitude.Value));
+			        return await _mongoContext.ExecuteAsync<HousePrice, IEnumerable<HousePrice>>("Transactions", async (activeCollection) =>
+			        {
+				        var locationQuery =
+					        new FilterDefinitionBuilder<HousePrice>().NearSphere(tag => tag.Location, point,
+						        radius);
+						var options = new FindOptions<HousePrice>()
+						{
+							BatchSize = 25,
+							Skip = 0,
+							Limit = 25
+						};
+				        var query = await activeCollection.FindAsync(locationQuery, options);
 
-            var housePrices = new List<HousePrice>();
+				        return await query.ToListAsync();
+			        });
 
+		        }
+		        catch (Exception ex)
+		        {
+			        int i = 0;
+			        //do something;
+		        }
+	        }
 
-            var postcodeInfo = PostcodeLookup.GetByPostcode(postcode);
-            try
-            {
-                var point = GeoJson.Point(GeoJson.Geographic(postcodeInfo.Longitude.Value, postcodeInfo.Latitude.Value));
-                var locationQuery = new FilterDefinitionBuilder<HousePrice>().Near(tag => tag.Location, point, radius); //fetch results that are within a 50 metre radius of the point we're searching.
-                var query = collection.Find<HousePrice>(locationQuery).Limit(25); //Limit the query to return only the top 10 results.
-                return query.ToList();
-            }
-            catch (Exception ex)
-            {
-                //do something;
-            }
-            return new HousePrice[0];
+	        return new HousePrice[0];
         }
     }
 }
