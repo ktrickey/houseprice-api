@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
-using MongoDB.Driver.Linq;
 
 namespace HousePrice.Api.Services
 {
@@ -33,7 +31,7 @@ namespace HousePrice.Api.Services
         public async Task<IEnumerable<HousePrice>> GetLookups(string postcode, double radius)
         {
 
-            var postcodeInfo = await PostcodeLookup.GetByPostcode(postcode);
+            var postcodeInfo = PostcodeLookup.GetByPostcode(postcode);
 	        if (postcodeInfo?.Longitude != null && postcodeInfo?.Latitude != null)
 	        {
 		        try

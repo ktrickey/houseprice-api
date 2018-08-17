@@ -55,6 +55,17 @@ namespace HousePrice.Api.Services
 			return await func(database);
 		}
 
+		public async Task ExecuteActionAsync<TIn>(string collectionName,  Func<IMongoCollection<TIn>, Task> action)
+		{
+			var collection = GetCollection<TIn>(collectionName);
+			await action(collection);
+		}
+
+		public async Task ExecuteActionAsync<TIn>(IMongoCollection<TIn> collection,  Func<IMongoCollection<TIn>, Task> action)
+		{
+			await action(collection);
+		}
+
 	}
 
 
