@@ -19,7 +19,7 @@ namespace HousePrice.Api.Services
 
 		    return new MongoRunner().RunInMongo<Task<IEnumerable<HousePrice>>, HousePrice>(async collection =>
 		    {
-			    var location = PostcodeLookup.GetByPostcode(postcode);
+			    var location = PostcodeLookup.GetByPostcode(postcode.ToUpper());
 
 			    var builder = Builders<HousePrice>.Filter;
 			    if (location?.Longitude != null && location?.Latitude != null)
@@ -29,14 +29,13 @@ namespace HousePrice.Api.Services
 				    {
 					    BatchSize = 25,
 					    Skip = 0,
-					    Limit = 25,
-						Sort =sort
+					    Limit = 25
 				    };
 
 				    var filter = builder.NearSphere(x => x.Location, location.Longitude.Value,
 					    location.Latitude.Value, radius);
 
-				    return await collection.FindAsync(filter).Result.ToListAsync();
+				    return await collection.FindAsync(filter, options).Result.ToListAsync();
 			    }
 				return new HousePrice[0];
 		    }).Result.OrderByDescending(x=>x.TransferDate);
@@ -54,7 +53,7 @@ namespace HousePrice.Api.Services
 
                     csvReader.Configuration.HasHeaderRecord = false;
                     csvReader.Configuration.RegisterClassMap<HousePriceMap>();
-                    var client = new MongoClient("mongodb://localhost:32222");
+                    var client = new MongoClient("mongodb://localhost:32768");
                     var database = client.GetDatabase("HousePrice");
                     //database.DropCollection("Transactions");
                     var collection = database.GetCollection<HousePrice>("Transactions");

@@ -10,7 +10,7 @@ namespace HousePrice.Api.Services
     {
 	    private IMongoCollection<T> GetCollection<T>()
 	    {
-		    var client = new MongoClient("mongodb://localhost:32222");
+		    var client = new MongoClient("mongodb://localhost:32768");
 		    var database = client.GetDatabase("HousePrice");
 		    //     database.DropCollection("Transactions");
 		    return database.GetCollection<T>("Transactions");

@@ -1,8 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousePrice.Api.Services", "HousePrice.Api.Services\HousePrice.Api.Services.csproj", "{62A838F9-08BA-4615-91C1-E44DA0F25754}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HousePrice.Api.Services", "HousePrice.Api.Services\HousePrice.Api.Services.csproj", "{62A838F9-08BA-4615-91C1-E44DA0F25754}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousePrice.Api.Cli", "HousePrice.Api.Cli\HousePrice.Api.Cli.csproj", "{F237AB22-F48B-472B-889A-385FE3DD4164}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HousePrice.Api.Cli", "HousePrice.Api.Cli\HousePrice.Api.Cli.csproj", "{F237AB22-F48B-472B-889A-385FE3DD4164}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousePrice.Api", "HousePrice.Api\HousePrice.Api.csproj", "{BE3853D0-DC01-410A-8D74-CA11B9EBCFE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +23,15 @@ Global
 		{F237AB22-F48B-472B-889A-385FE3DD4164}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F237AB22-F48B-472B-889A-385FE3DD4164}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F237AB22-F48B-472B-889A-385FE3DD4164}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE3853D0-DC01-410A-8D74-CA11B9EBCFE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE3853D0-DC01-410A-8D74-CA11B9EBCFE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE3853D0-DC01-410A-8D74-CA11B9EBCFE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE3853D0-DC01-410A-8D74-CA11B9EBCFE8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A71F4EC8-4EE5-498F-9CBD-51B971CBE470}
 	EndGlobalSection
 EndGlobal
