@@ -30,6 +30,8 @@ namespace HousePrice.WebAPi
 
             services.AddScoped<IImporter, Importer>();
             services.AddScoped<ILookup, Lookup>();
+
+            PostcodeLookup.GetByPostcode("");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

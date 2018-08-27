@@ -38,10 +38,12 @@ namespace HousePrice.Api.Services
 				using (var streamReader =
 					new StreamReader(new FileStream(@"c:\mongo\ukpostcodes.csv", FileMode.Open, FileAccess.Read)))
 				{
+	
 					using (var csvReader = new CsvHelper.CsvReader(streamReader))
 					{
 						csvReader.Configuration.BufferSize = 131072;
 						var recs = csvReader.GetRecords<PostcodeData>();
+
 						var timer = Stopwatch.StartNew();
 						postcodeLookup = recs.ToDictionary(p => p.Postcode);
 						timer.Stop();

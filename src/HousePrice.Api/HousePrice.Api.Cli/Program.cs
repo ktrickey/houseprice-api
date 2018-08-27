@@ -11,8 +11,8 @@ namespace HousePrice.Api.Cli
         static async Task Main(string[] args)
         {
             Console.WriteLine("Populating lookup");
-	        var isReady = PostcodeLookup.IsReady;
-           // var importer = new HousePrice.Api.Services.Importer();
+            var isReady = PostcodeLookup.IsReady;
+            // var importer = new HousePrice.Api.Services.Importer();
 //            var tasks = new List<Task>();
 //            for (int year = 1995; year <= 2018; year++)
 //            {
@@ -26,11 +26,11 @@ namespace HousePrice.Api.Cli
 //           Console.WriteLine("Adding index");
 //           await importer.AddIndex();
 
-	        //await importer.AddPostcodeIndex();
-	        //await importer.AddTransferDateIndex();
+            //await importer.AddPostcodeIndex();
+            //await importer.AddTransferDateIndex();
 
-	       
-	         var stuff = await new Lookup().GetLookups("ZZ999ZZ", 1000);
+            Console.ReadLine();
+            var stuff = await new Lookup().GetLookups("ZZ999ZZ", 1000);
         }
     }
 }

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
@@ -9,9 +11,21 @@ using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace HousePrice.Api.Services
 {
+	public class PagedResult<T>
+	{
+		public PagedResult(long totalRows, IEnumerable<T> results)
+		{
+			_totalRows = totalRows;
+			_results = results;
+		}
+		private readonly long _totalRows;
+		private readonly IEnumerable<T> _results;
+		public long TotalRows => _totalRows;
+		public IEnumerable<T> Results => _results;
+	}
     public interface ILookup
     {
-        Task<IEnumerable<HousePrice>> GetLookups(string postcode, double radius);
+	    Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius);
     }
 
     public class Lookup : ILookup
@@ -29,9 +43,11 @@ namespace HousePrice.Api.Services
 			_mongoContext = new MongoContext(configuration["connectionString"], "HousePrice");
         }
 
-        public async Task<IEnumerable<HousePrice>> GetLookups(string postcode, double radius)
-        {
 
+        public async Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius)
+        {
+			Console.WriteLine("Starting retrieval...");
+	        var timer = Stopwatch.StartNew();
             var postcodeInfo = PostcodeLookup.GetByPostcode(postcode);
 	        if (postcodeInfo?.Longitude != null && postcodeInfo?.Latitude != null)
 	        {
@@ -39,30 +55,44 @@ namespace HousePrice.Api.Services
 		        {
 			        var point = GeoJson.Point(GeoJson.Geographic(postcodeInfo.Longitude.Value,
 				        postcodeInfo.Latitude.Value));
-			        return await _mongoContext.ExecuteAsync<HousePrice, IEnumerable<HousePrice>>("Transactions", async (activeCollection) =>
+//			        var totalRows = await _mongoContext.ExecuteAsync<HousePrice, long > ("Transactions",
+//				        async (activeCollection) =>
+//				        {
+//					        var locationQuery =
+//						        new FilterDefinitionBuilder<HousePrice>().GeoWithinCenterSphere(
+//							        tag => tag.Location, 
+//							        postcodeInfo.Longitude.Value,
+//							        postcodeInfo.Latitude.Value,
+//							        (radius/1000)/6371
+//							    );
+//
+//
+//					        return await activeCollection.Find(locationQuery).CountDocumentsAsync();
+//
+//
+//				        });
+			        var list = await _mongoContext.ExecuteAsync<HousePrice, PagedResult<HousePrice>>("Transactions",
+				        async (activeCollection) =>
 			        {
 				        var locationQuery =
-					        new FilterDefinitionBuilder<HousePrice>().NearSphere(tag => tag.Location, point,
-						        radius);
-				        var proj = Builders<HousePrice>.Projection.ToBsonDocument();
+					        new FilterDefinitionBuilder<HousePrice>().GeoWithinCenterSphere(
+						        tag => tag.Location,
+						        postcodeInfo.Longitude.Value,
+						        postcodeInfo.Latitude.Value,
+						        (radius/1000)/6371);
+				      
 						var sort = new SortDefinitionBuilder<HousePrice>().Descending(x=>x.TransferDate);
-						var options = new FindOptions<HousePrice>()
-						{
-							BatchSize = 25,
-							Skip = 0,
-							Limit = 25,
-							Projection = proj,
-							Sort = sort
-
-						};
 				       
-				        var query = await activeCollection.FindAsync(locationQuery, options);
+				        var query = activeCollection.Find(locationQuery);
 
+				        return new PagedResult<HousePrice>(100, await query.Sort(sort).Skip(0).Limit(25).ToListAsync());
 				        
-
-				        return await query.ToListAsync();
 			        });
 
+			        timer.Stop();
+
+			        Console.WriteLine(TimeSpan.FromMilliseconds(timer.ElapsedMilliseconds).ToString() );
+			        return list;
 		        }
 		        catch (Exception ex)
 		        {
@@ -71,7 +101,7 @@ namespace HousePrice.Api.Services
 		        }
 	        }
 
-	        return new HousePrice[0];
+	        return new PagedResult<HousePrice>(0, new HousePrice[0]);
         }
     }
 }
