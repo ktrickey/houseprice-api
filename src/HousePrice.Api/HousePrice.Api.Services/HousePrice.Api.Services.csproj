@@ -6,6 +6,8 @@
 
     <ItemGroup>
       <PackageReference Include="CsvHelper" Version="7.1.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.1.1" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
       <PackageReference Include="MongoDB.Driver" Version="2.7.0" />
       <PackageReference Include="Polly" Version="6.1.0" />

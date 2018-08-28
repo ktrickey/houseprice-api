@@ -1,0 +1,18 @@
+version: '3.4'
+
+services:
+  houseprice.webapi:
+    image: ${DOCKER_REGISTRY}housepricewebapi
+    build:
+      context: .
+      dockerfile: HousePrice.WebAPi/Dockerfile
+    volumes:
+      - "C:\\HousePrice\\Docker\\Postcode:/postcodedata"
+  houseprice.importer:
+    image: ${DOCKER_REGISTRY}housepriceimportfilewatcher
+    build:
+      context: .
+      dockerfile: HousePrice.Api.ImportFileWatcher/Dockerfile
+    volumes:
+      - "C:\\HousePrice\\Docker\\Transactions:/transaction_data"
+      - "C:\\HousePrice\\Docker\\Postcode:/postcodedata"

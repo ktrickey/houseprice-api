@@ -18,7 +18,9 @@ namespace HousePrice.Api.Services
 		{
 			var builder = new ConfigurationBuilder()
 				.SetBasePath(Directory.GetCurrentDirectory())
-				.AddJsonFile("appsettings.json");
+				
+				.AddJsonFile("appsettings.json")
+				.AddEnvironmentVariables();
 
 			var configuration = builder.Build();
 
@@ -40,19 +42,29 @@ namespace HousePrice.Api.Services
 
 						while (csvReader.Read())
 						{
-							var record = csvReader.GetRecord<HousePrice>();
-							record.Postcode = record.Postcode.Replace(" ", String.Empty);
-							var locationData = PostcodeLookup.GetByPostcode(record.Postcode);
-							record.Location = locationData?.Latitude != null && locationData?.Longitude != null
-								? new Location(locationData?.Latitude, locationData?.Longitude)
-								: null;
-							batch.Add(record);
-
-							if (batch.Count == 1000)
+							try
 							{
-								await collection.InsertManyAsync(batch);
-								batch.Clear();
+								var record = csvReader.GetRecord<HousePrice>();
+								record.Postcode = record.Postcode.Replace(" ", String.Empty);
+								var locationData = PostcodeLookup.GetByPostcode(record.Postcode);
+								record.Location = locationData?.Latitude != null && locationData?.Longitude != null
+									? new Location(locationData?.Latitude, locationData?.Longitude)
+									: null;
+								batch.Add(record);
 							}
+							catch (Exception e)
+							{
+								Console.WriteLine(e);
+								throw;
+							}
+							
+			
+
+							//if (batch.Count == 1000)
+							//{
+							//	await collection.InsertManyAsync(batch);
+							//	batch.Clear();
+							//}
 
 
 						}

@@ -35,7 +35,8 @@ namespace HousePrice.Api.Services
         {
 			var builder = new ConfigurationBuilder()
 				.SetBasePath(Directory.GetCurrentDirectory())
-				.AddJsonFile("appsettings.json");
+				.AddJsonFile("appsettings.json")
+				.AddEnvironmentVariables();
 
 			var configuration = builder.Build();
 
@@ -53,24 +54,6 @@ namespace HousePrice.Api.Services
 	        {
 		        try
 		        {
-			        var point = GeoJson.Point(GeoJson.Geographic(postcodeInfo.Longitude.Value,
-				        postcodeInfo.Latitude.Value));
-//			        var totalRows = await _mongoContext.ExecuteAsync<HousePrice, long > ("Transactions",
-//				        async (activeCollection) =>
-//				        {
-//					        var locationQuery =
-//						        new FilterDefinitionBuilder<HousePrice>().GeoWithinCenterSphere(
-//							        tag => tag.Location, 
-//							        postcodeInfo.Longitude.Value,
-//							        postcodeInfo.Latitude.Value,
-//							        (radius/1000)/6371
-//							    );
-//
-//
-//					        return await activeCollection.Find(locationQuery).CountDocumentsAsync();
-//
-//
-//				        });
 			        var list = await _mongoContext.ExecuteAsync<HousePrice, PagedResult<HousePrice>>("Transactions",
 				        async (activeCollection) =>
 			        {

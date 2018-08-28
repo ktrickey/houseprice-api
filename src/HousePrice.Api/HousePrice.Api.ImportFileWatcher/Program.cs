@@ -3,30 +3,54 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using HousePrice.Api.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace HousePrice.Api.ImportFileWatcher
 {
 	class Program
 	{
-		static void Main(string[] args)
+		static void Main()
 		{
 
+			var builder = new ConfigurationBuilder()
+				.SetBasePath(Directory.GetCurrentDirectory())
+				.AddJsonFile("appsettings.json")
+				.AddEnvironmentVariables();
+
+			var configuration = builder.Build();
+
+
+			
+			
 			//Monitor the drop directory for new files - Docker will map to file system as will k8s
-			var watchDirectory = Path.Combine(Directory.GetCurrentDirectory(), $"Client\\{args[0]}\\Import\\Drop");
-			var successDirectory = Path.Combine(Directory.GetCurrentDirectory(), $"Client\\{args[0]}\\Import\\Complete");
+			var watchDirectory = "/transaction_data/Import/Drop";
+			var successDirectory = "/transaction_data/Import/Complete";
+			var files = Directory.GetFiles(watchDirectory);
 			FileSystemWatcher watcher = new FileSystemWatcher(watchDirectory );
 			PostcodeLookup.GetByPostcode("");
 			var importer = new Importer();
 			while (true)
 			{
-				var watch = watcher.WaitForChanged(WatcherChangeTypes.Created);
-				var watchedFile = Path.Combine(watchDirectory, watch.Name);
-				using (var fileStream = new FileStream(watchedFile, FileMode.Open, FileAccess.Read))
+				Thread.Sleep(10000);
+				var currentFiles = Directory.GetFiles(watchDirectory);
+
+
+				//var watch = watcher.WaitForChanged(WatcherChangeTypes.All);
+				//var watchedFile = Path.Combine(watchDirectory, watch.Name);
+
+				foreach (var watchedFile in currentFiles)
 				{
-					importer.Import(fileStream);
+
+					var info = new FileInfo(watchedFile);
+					Console.WriteLine($"Processing {info.Name}");
+					using (var fileStream = new FileStream(watchedFile, FileMode.Open, FileAccess.Read))
+					{
+						importer.Import(fileStream);
+					}
+					File.Move(watchedFile, Path.Combine(successDirectory, info.Name));
 				}
 
-				File.Move(watchedFile, Path.Combine(successDirectory, watch.Name));
+				
 
 			}
 			// ReSharper disable once FunctionNeverReturns
