@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,6 +39,7 @@ namespace HousePrice.Api.ImportFileWatcher
 				//var watch = watcher.WaitForChanged(WatcherChangeTypes.All);
 				//var watchedFile = Path.Combine(watchDirectory, watch.Name);
 
+
 				foreach (var watchedFile in currentFiles)
 				{
 
@@ -45,12 +47,19 @@ namespace HousePrice.Api.ImportFileWatcher
 					Console.WriteLine($"Processing {info.Name}");
 					using (var fileStream = new FileStream(watchedFile, FileMode.Open, FileAccess.Read))
 					{
-						importer.Import(fileStream);
+						var task = importer.Import(info.Name, fileStream);
+						task.Wait();
 					}
 					File.Move(watchedFile, Path.Combine(successDirectory, info.Name));
 				}
 
-				
+
+				foreach (var watchedFile in currentFiles)
+				{
+					var info = new FileInfo(watchedFile);
+					
+				}
+
 
 			}
 			// ReSharper disable once FunctionNeverReturns

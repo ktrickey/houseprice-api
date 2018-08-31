@@ -9,7 +9,7 @@ namespace HousePrice.Api.Services
 {
 	public interface IImporter
 	{
-		Task Import(Stream csvStream);
+		Task Import(string name, Stream csvStream);
 	}
 	public class Importer : IImporter
 	{
@@ -27,7 +27,7 @@ namespace HousePrice.Api.Services
 			
 			_mongoContext = new MongoContext(configuration["connectionString"], "HousePrice");
 		}
-		public async Task Import(Stream csvStream)
+		public async Task Import(string name, Stream csvStream)
 		{
 			await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
 			{
@@ -57,17 +57,22 @@ namespace HousePrice.Api.Services
 								Console.WriteLine(e);
 								throw;
 							}
-							
-			
+
+
 
 							//if (batch.Count == 1000)
 							//{
 							//	await collection.InsertManyAsync(batch);
 							//	batch.Clear();
-							//}
-
+						}
+						if (batch.Count % 1000 == 0)
+						{
+							Console.WriteLine($"{name}: {batch.Count}");
 
 						}
+
+
+					
 
 						await collection.InsertManyAsync(batch);
 					}

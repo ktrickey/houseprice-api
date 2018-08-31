@@ -38,7 +38,7 @@ namespace HousePrice.WebAPi.Controllers
         [HttpPut()]
         public void Put(int id, [FromBody] string value)
         {
-            _importer.Import(null);
+            _importer.Import(null, null);
         }
 
         // DELETE api/values/5

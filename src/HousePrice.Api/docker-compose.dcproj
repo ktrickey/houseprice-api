@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
-    <ProjectGuid>2aa468d2-3cc8-4887-bce3-cfdb827348d8</ProjectGuid>
+    <ProjectGuid>cd04b6f6-838f-45e7-a18d-2a11e23847ee</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
     <DockerServiceName>houseprice.webapi</DockerServiceName>
