@@ -10,7 +10,7 @@ namespace HousePrice.Api.ImportFileWatcher
 {
 	class Program
 	{
-		static void Main()
+		static async Task Main()
 		{
 
 			var builder = new ConfigurationBuilder()
@@ -24,44 +24,32 @@ namespace HousePrice.Api.ImportFileWatcher
 			
 			
 			//Monitor the drop directory for new files - Docker will map to file system as will k8s
+			// Filewatcher not reliable, especially in Linux Docker containers on Windows, therefore
+			// we'll have one going, but back it up with
 			var watchDirectory = "/transaction_data/Import/Drop";
 			var successDirectory = "/transaction_data/Import/Complete";
 			var files = Directory.GetFiles(watchDirectory);
-			FileSystemWatcher watcher = new FileSystemWatcher(watchDirectory );
+
 			PostcodeLookup.GetByPostcode("");
 			var importer = new Importer();
-			while (true)
+
+			var watcher = new PollingWatcher(watchDirectory, (f) =>
 			{
-				Thread.Sleep(10000);
-				var currentFiles = Directory.GetFiles(watchDirectory);
-
-
-				//var watch = watcher.WaitForChanged(WatcherChangeTypes.All);
-				//var watchedFile = Path.Combine(watchDirectory, watch.Name);
-
-
-				foreach (var watchedFile in currentFiles)
+				Console.WriteLine($"Processing {f.Name}");
+				using (var fileStream = new FileStream(f.FullName, FileMode.Open, FileAccess.Read))
 				{
-
-					var info = new FileInfo(watchedFile);
-					Console.WriteLine($"Processing {info.Name}");
-					using (var fileStream = new FileStream(watchedFile, FileMode.Open, FileAccess.Read))
-					{
-						var task = importer.Import(info.Name, fileStream);
-						task.Wait();
-					}
-					File.Move(watchedFile, Path.Combine(successDirectory, info.Name));
+					var task = importer.Import(f.Name, fileStream);
+					task.Wait();
 				}
+				File.Move(f.FullName, Path.Combine(successDirectory, f.Name));
+			});
 
+			await watcher.StartPolling();
 
-				foreach (var watchedFile in currentFiles)
-				{
-					var info = new FileInfo(watchedFile);
-					
-				}
-
-
+			while (1 == 2)
+			{
 			}
+
 			// ReSharper disable once FunctionNeverReturns
 		}
 	}

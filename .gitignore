@@ -328,3 +328,22 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+/.nyc_output/7ed993596fc958bf35ad74451f47c6c6.json
+/.nyc_output/b3c5d1c1cbdd5cf501fc7530e34d36dc.json
+/.nyc_output/ce2d228940cc5fa141b7f896b9af9874.json
+/.vscode/settings.json
+/coverage/base.css
+/coverage/block-navigation.js
+/coverage/index.html
+/coverage/lcov.info
+/coverage/lcov-report/base.css
+/coverage/lcov-report/block-navigation.js
+/coverage/lcov-report/index.html
+/coverage/lcov-report/prettify.css
+/coverage/lcov-report/prettify.js
+/coverage/lcov-report/sort-arrow-sprite.png
+/coverage/lcov-report/sorter.js
+/coverage/prettify.css
+/coverage/prettify.js
+/coverage/sort-arrow-sprite.png
+/coverage/sorter.js
