@@ -8,49 +8,47 @@ using Microsoft.Extensions.Configuration;
 
 namespace HousePrice.Api.ImportFileWatcher
 {
-	class Program
-	{
-		static async Task Main()
-		{
+    class Program
+    {
+        static async Task Main()
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .AddEnvironmentVariables();
 
-			var builder = new ConfigurationBuilder()
-				.SetBasePath(Directory.GetCurrentDirectory())
-				.AddJsonFile("appsettings.json")
-				.AddEnvironmentVariables();
-
-			var configuration = builder.Build();
+            var configuration = builder.Build();
 
 
-			
-			
-			//Monitor the drop directory for new files - Docker will map to file system as will k8s
-			// Filewatcher not reliable, especially in Linux Docker containers on Windows, therefore
-			// we'll have one going, but back it up with
-			var watchDirectory = "/transaction_data/Import/Drop";
-			var successDirectory = "/transaction_data/Import/Complete";
-			var files = Directory.GetFiles(watchDirectory);
+            //Monitor the drop directory for new files - Docker will map to file system as will k8s
+            // Filewatcher not reliable, especially in Linux Docker containers on Windows, therefore
+            // we'll have one going, but back it up with
+            var watchDirectory = "/transaction_data/Import/Drop";
+            var successDirectory = "/transaction_data/Import/Complete";
+            var files = Directory.GetFiles(watchDirectory);
 
-			PostcodeLookup.GetByPostcode("");
-			var importer = new Importer();
+            PostcodeLookup.GetByPostcode("");
+            var importer = new Importer();
 
-			var watcher = new PollingWatcher(watchDirectory, (f) =>
-			{
-				Console.WriteLine($"Processing {f.Name}");
-				using (var fileStream = new FileStream(f.FullName, FileMode.Open, FileAccess.Read))
-				{
-					var task = importer.Import(f.Name, fileStream);
-					task.Wait();
-				}
-				File.Move(f.FullName, Path.Combine(successDirectory, f.Name));
-			});
+            var watcher = new PollingWatcher(new FilePoller(watchDirectory, (f) =>
+            {
+                Console.WriteLine($"Processing {f.Name}");
+                using (var fileStream = new FileStream(f.FullName, FileMode.Open, FileAccess.Read))
+                {
+                    var task = importer.Import(f.Name, fileStream);
+                    task.Wait();
+                }
 
-			await watcher.StartPolling();
+                File.Move(f.FullName, Path.Combine(successDirectory, f.Name));
+            }));
 
-			while (1 == 2)
-			{
-			}
+            await watcher.StartPolling();
 
-			// ReSharper disable once FunctionNeverReturns
-		}
-	}
+            while (1 == 2)
+            {
+            }
+
+            // ReSharper disable once FunctionNeverReturns
+        }
+    }
 }

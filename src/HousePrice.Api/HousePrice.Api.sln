@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HousePrice.Api.ImportFileWa
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{CD04B6F6-838F-45E7-A18D-2A11E23847EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousePrice.Api.ImportFileWatcher.Tests", "HousePrice.Api.ImportFileWatcher.Tests\HousePrice.Api.ImportFileWatcher.Tests.csproj", "{C80FF246-10A5-43DD-802A-83255C47342B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{CD04B6F6-838F-45E7-A18D-2A11E23847EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD04B6F6-838F-45E7-A18D-2A11E23847EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD04B6F6-838F-45E7-A18D-2A11E23847EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C80FF246-10A5-43DD-802A-83255C47342B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C80FF246-10A5-43DD-802A-83255C47342B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C80FF246-10A5-43DD-802A-83255C47342B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C80FF246-10A5-43DD-802A-83255C47342B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

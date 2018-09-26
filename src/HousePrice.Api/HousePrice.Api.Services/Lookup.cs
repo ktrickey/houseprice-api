@@ -62,9 +62,9 @@ namespace HousePrice.Api.Services
 						        tag => tag.Location,
 						        postcodeInfo.Longitude.Value,
 						        postcodeInfo.Latitude.Value,
-						        (radius/1000)/6371);
+						        (radius / 1000) / 6371);
 				      
-						var sort = new SortDefinitionBuilder<HousePrice>().Descending(x=>x.TransferDate);
+						var sort = new SortDefinitionBuilder<HousePrice>().Descending(x => x.TransferDate);
 				       
 				        var query = activeCollection.Find(locationQuery);
 
