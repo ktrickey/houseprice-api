@@ -42,7 +42,7 @@ namespace HousePrice.Api.ImportFileWatcher
                 File.Move(f.FullName, Path.Combine(successDirectory, f.Name));
             }));
 
-            await watcher.StartPolling();
+            watcher.StartPolling();
 
             while (1 == 2)
             {

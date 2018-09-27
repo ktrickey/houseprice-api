@@ -14,19 +14,122 @@ namespace HousePrice.Api.ImportFileWatcher.Tests
                 await writer.WriteAsync("My stuff");
             }
         }
+
+        private async Task ModifyFile(string fileName)
+        {
+            using (var writer = new StreamWriter(fileName))
+            {
+                await writer.WriteAsync("More of my stuff");
+            }
+        }
+
+        private void DeleteFile(string fileName)
+        {
+            if (File.Exists(fileName))
+            {
+                File.Delete(fileName);
+            }
+        }
+
         [Fact]
         public async Task ShouldExecuteDelegateOnFileCreation()
         {
             var callReceived = false;
-            var filename = "xxxx.xxx";
-            var poller = new FilePoller(".\\", (f) => { if (
-                f.Name ==  filename)
-                { callReceived= true;} });
+            var filename = "create.xxx";
+            DeleteFile(filename);
+            var poller = new FilePoller(".\\", (f) =>
+            {
+                if (
+                    f.Name == filename)
+                {
+                    callReceived = true;
+                }
+            });
 
-             poller.StartPolling(1000);
-             await CreateFile("xxxx.xxx");
+            poller.StartPolling(10);
+            await CreateFile(filename);
 
-            await Task.Delay(2000);
+            await Task.Delay(100);
+            Assert.True(callReceived);
+        }
+
+        [Fact]
+        public async Task ShouldExecuteDelegateOnFileModification()
+        {
+            var callReceived = false;
+            var filename = "Modify.xxx";
+            DeleteFile(filename);
+            await CreateFile(filename);
+            var poller = new FilePoller(".\\", null, (f) =>
+            {
+                if (f.Name == filename)
+                {
+                    callReceived = true;
+                }
+            });
+
+            poller.StartPolling(10);
+            await ModifyFile(filename);
+
+
+            await Task.Delay(30);
+            Assert.True(callReceived);
+        }
+
+        [Fact]
+        public async Task ShouldExecuteDelegateOnFileDeletion()
+        {
+            var callReceived = false;
+            var filename = "Delete.xxx";
+            DeleteFile(filename);
+            await CreateFile(filename);
+            var poller = new FilePoller(".\\", null, null, (f) =>
+            {
+                if (f.Name == filename)
+                {
+                    callReceived = true;
+                }
+            });
+
+            poller.StartPolling(10);
+            DeleteFile(filename);
+
+            await Task.Delay(30);
+            Assert.True(callReceived);
+        }
+
+        [Fact]
+        public async Task ShouldCallOnErrorIfErrorOccurs()
+        {
+            var callReceived = false;
+            var filename = "Delete.xxx";
+            DeleteFile(filename);
+            await CreateFile(filename);
+
+            var poller = new FilePoller(".\\", null, null,  (file) => 
+                throw new Exception(), null,
+                (filenameFail, e) => { callReceived = true; });
+
+            poller.StartPolling(10);
+            File.Delete(filename);
+
+            await Task.Delay(30);
+            Assert.True(callReceived);
+        }
+        
+        [Fact]
+        public async Task ShouldCallOnSuccess()
+        {
+            var callReceived = false;
+            var filename = "Delete.xxx";
+            DeleteFile(filename);
+
+            var poller = new FilePoller(".\\", null, null, null,  (fileInfo) => { callReceived = true; });
+
+            poller.StartPolling(10);
+            File.Delete(filename);
+
+            await Task.Delay(30);
             Assert.True(callReceived);
         }
     }

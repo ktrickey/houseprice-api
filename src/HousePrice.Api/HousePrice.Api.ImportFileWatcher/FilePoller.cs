@@ -43,13 +43,17 @@ namespace HousePrice.Api.ImportFileWatcher
         public void StartPolling(int timeout = 5000)
         {
             var timer = new Timer {Interval = timeout};
+            
+            _lastState = Directory.GetFiles(_watchPath)
+                .Select(f => new FileInfo(f))
+                .ToDictionary(k => k.FullName);
+            
             timer.Elapsed += (sender, eventArgs) =>
             {
-
-                var currentFiles = Directory.GetFiles(_watchPath).Select(f => new FileInfo(f))
+                var currentFiles = Directory.GetFiles(_watchPath)
+                    .Select(f => new FileInfo(f))
                     .ToDictionary(k => k.FullName);
-
-
+                
                 foreach (var watchedFileInfo in currentFiles.Values)
                 {
                     Console.WriteLine($"Processing {watchedFileInfo.Name}");
@@ -93,7 +97,7 @@ namespace HousePrice.Api.ImportFileWatcher
             };
    
 
-timer.Enabled = true;
+            timer.Enabled = true;
 
 
         // ReSharper disable once FunctionNeverReturns

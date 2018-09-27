@@ -28,7 +28,7 @@ namespace HousePrice.Api.ImportFileWatcher
             }
         }
 
-        public async Task StartPolling()
+        public void StartPolling()
         {
             _watcher.EnableRaisingEvents = true;
 
