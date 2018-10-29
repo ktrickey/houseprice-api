@@ -31,7 +31,9 @@ namespace HousePrice.Api.Services
     public class Lookup : ILookup
     {
 	    private readonly MongoContext _mongoContext;
-        public Lookup()
+	    private string _postcodeDataLocation;
+
+	    public Lookup()
         {
 			var builder = new ConfigurationBuilder()
 				.SetBasePath(Directory.GetCurrentDirectory())
@@ -42,6 +44,7 @@ namespace HousePrice.Api.Services
 
 			
 			_mongoContext = new MongoContext(configuration["connectionString"], "HousePrice");
+	        _postcodeDataLocation = configuration["postcodeDataDirectory"];
         }
 
 

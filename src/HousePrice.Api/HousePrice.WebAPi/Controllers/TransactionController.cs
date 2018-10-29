@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousePrice.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace HousePrice.WebAPi.Controllers
 {
@@ -25,6 +26,7 @@ namespace HousePrice.WebAPi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Api.Services.HousePrice>>> Get(string postcode, double radius)
         {
+			Log.Information($"Processing request for {postcode} within {radius} km");
             return Ok(await _lookup.GetLookups(postcode, radius *1000));
         }
 

@@ -1,10 +1,5 @@
 FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
-ENV IMPORT_DATA_ROOT "/transaction_data"
-ENV POSTCODE_DATA "/postcodedata/ukpostcodes.csv"
-ENV connectionString "mongodb://mongo-houseprice:27017"
 WORKDIR /app
-EXPOSE 49457
-EXPOSE 44382
 
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
