@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using HousePrice.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,11 @@ namespace HousePrice.WebAPi.Controllers
         public async Task<ActionResult<IEnumerable<Api.Services.HousePrice>>> Get(string postcode, double radius)
         {
 			Log.Information($"Processing request for {postcode} within {radius} km");
+
+            if (Directory.Exists("/data/postcodes"))
+            {
+                Log.Information("Directory exists");
+            }
             return Ok(await _lookup.GetLookups(postcode, radius *1000));
         }
 

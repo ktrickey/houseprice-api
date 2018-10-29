@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
@@ -48,7 +49,9 @@ namespace HousePrice.Api.Services
 			{
 				PopulateTask = new Task(() =>
 				{
-					using (var streamReader =
+
+
+				    using (var streamReader =
 						new StreamReader(new FileStream(postcodeFile, FileMode.Open, FileAccess.Read)))
 					{
 
