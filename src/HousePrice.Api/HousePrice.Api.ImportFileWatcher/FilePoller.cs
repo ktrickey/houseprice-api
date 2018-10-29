@@ -31,10 +31,10 @@ namespace HousePrice.Api.ImportFileWatcher
            
         }
 
-        public string FilePath => _watchPath;
-        public Action<FileInfo> OnFileCreate => _onFileCreate;
-        public Action<FileInfo> OnFileModify => _onFileModify;
-        public Action<FileInfo> OnFileDelete => _onFileDelete;
+//        public string FilePath => _watchPath;
+//        public Action<FileInfo> OnFileCreate => _onFileCreate;
+//        public Action<FileInfo> OnFileModify => _onFileModify;
+//        public Action<FileInfo> OnFileDelete => _onFileDelete;
 
         private DateTime _lastSnapShot = DateTime.MinValue;
         

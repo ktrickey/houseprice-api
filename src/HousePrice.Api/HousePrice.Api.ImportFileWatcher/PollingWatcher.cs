@@ -11,21 +11,21 @@ namespace HousePrice.Api.ImportFileWatcher
         {
             _poller = poller;
             
-            _watcher = new FileSystemWatcher(poller.FilePath);
-            if (poller.OnFileModify != null)
-            {
-                _watcher.Changed += (sender, eventArgs) => { poller.OnFileModify(new FileInfo(eventArgs.FullPath)); };
-            }
-
-            if (poller.OnFileCreate != null)
-            {
-                _watcher.Created += (sender, eventArgs) => { poller.OnFileCreate(new FileInfo(eventArgs.FullPath)); };
-            }
-
-            if (poller.OnFileDelete != null)
-            {
-                _watcher.Deleted += (sender, eventArgs) => { poller.OnFileDelete(new FileInfo(eventArgs.FullPath)); };
-            }
+//            _watcher = new FileSystemWatcher(poller.FilePath);
+//            if (poller.OnFileModify != null)
+//            {
+//                _watcher.Changed += (sender, eventArgs) => { poller.OnFileModify(new FileInfo(eventArgs.FullPath)); };
+//            }
+//
+//            if (poller.OnFileCreate != null)
+//            {
+//                _watcher.Created += (sender, eventArgs) => { poller.OnFileCreate(new FileInfo(eventArgs.FullPath)); };
+//            }
+//
+//            if (poller.OnFileDelete != null)
+//            {
+//                _watcher.Deleted += (sender, eventArgs) => { poller.OnFileDelete(new FileInfo(eventArgs.FullPath)); };
+//            }
         }
 
         public void StartPolling()
