@@ -58,22 +58,12 @@ namespace HousePrice.Api.Services
 								throw;
 							}
 
-
-
-							//if (batch.Count == 1000)
-							//{
-							//	await collection.InsertManyAsync(batch);
-							//	batch.Clear();
 						}
 						if (batch.Count % 1000 == 0)
 						{
 							Console.WriteLine($"{name}: {batch.Count}");
 
 						}
-
-
-					
-
 						await collection.InsertManyAsync(batch);
 					}
 
@@ -90,9 +80,6 @@ namespace HousePrice.Api.Services
 			{
 				await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
 			});
-
-          
-                    
 		}
 
 		public async Task AddPostcodeIndex()
@@ -104,7 +91,6 @@ namespace HousePrice.Api.Services
 			{
 				await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
 			});
-
 		}
 
 		public async Task AddTransferDateIndex()
@@ -118,8 +104,6 @@ namespace HousePrice.Api.Services
 			});
 
 		}
-
-
 
 		public void GetMatches(string postcode, double radius)
 		{
