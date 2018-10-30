@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using Serilog;
 
 namespace HousePrice.Api.Services
 {
@@ -27,6 +28,7 @@ namespace HousePrice.Api.Services
 			
 			_mongoContext = new MongoContext(configuration["connectionString"], "HousePrice");
 		}
+
 		public async Task Import(string name, Stream csvStream)
 		{
 			await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
@@ -54,7 +56,7 @@ namespace HousePrice.Api.Services
 							}
 							catch (Exception e)
 							{
-								Console.WriteLine(e);
+								Log.Error(e.Message);
 								throw;
 							}
 

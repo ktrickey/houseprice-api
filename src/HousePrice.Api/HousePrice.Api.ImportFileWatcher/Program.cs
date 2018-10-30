@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using HousePrice.Api.Services;
 using Microsoft.Extensions.Configuration;
+using RestSharp;
+using Serilog;
 
 namespace HousePrice.Api.ImportFileWatcher
 {
@@ -19,24 +21,32 @@ namespace HousePrice.Api.ImportFileWatcher
 
             var configuration = builder.Build();
 
+            var apiEndpoint = configuration["endPoint"];
+
+            var client = new RestClient(apiEndpoint);
+
 
             //Monitor the drop directory for new files - Docker will map to file system as will k8s
             // Filewatcher not reliable, especially in Linux Docker containers on Windows, therefore
             // we'll have one going, but back it up with
-            var watchDirectory = "/transaction_data/Import/Drop";
-            var successDirectory = "/transaction_data/Import/Complete";
-            var files = Directory.GetFiles(watchDirectory);
 
-            PostcodeLookup.GetByPostcode("");
-            var importer = new Importer();
+//            var watchDirectory = "/transaction_data/Import/Drop";
+//            var successDirectory = "/transaction_data/Import/Complete";
 
-            var watcher = new PollingWatcher(new FilePoller(watchDirectory, (f) =>
+            var watchDirectory = configuration["watchDirectory"];
+            var successDirectory = configuration["successDirectory"];
+
+            var watcher = new PollingWatcher( new FilePoller(watchDirectory, async (f) =>
             {
-                Console.WriteLine($"Processing {f.Name}");
-                using (var fileStream = new FileStream(f.FullName, FileMode.Open, FileAccess.Read))
+                Log.Information($"Processing {f.Name}");
+                using (var streamReader = new StreamReader( new FileStream(f.FullName, FileMode.Open, FileAccess.Read)))
                 {
-                    var task = importer.Import(f.Name, fileStream);
-                    task.Wait();
+                    // change this to push to the transaction API
+                    var req = new RestRequest($"api/transaction/{f.Name}");
+                    req.AddBody(new {transactions = await streamReader.ReadToEndAsync()});
+                    req.RequestFormat = DataFormat.Json;
+                    var result = await client.ExecutePostTaskAsync<object>(req);
+
                 }
 
                 File.Move(f.FullName, Path.Combine(successDirectory, f.Name));
@@ -44,8 +54,9 @@ namespace HousePrice.Api.ImportFileWatcher
 
             watcher.StartPolling();
 
-            while (1 == 2)
+            while (true)
             {
+                Thread.Sleep(5000);
             }
 
             // ReSharper disable once FunctionNeverReturns

@@ -38,8 +38,19 @@ namespace HousePrice.WebAPi.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async void Post(string importName, [FromBody] string transactions)
         {
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(memoryStream))
+                {
+                    writer.Write(transactions);
+                    await writer.FlushAsync();
+                    memoryStream.Position = 0;
+                    await _importer.Import(importName, memoryStream);
+                }
+            }
+
         }
 
         // PUT api/values/5
