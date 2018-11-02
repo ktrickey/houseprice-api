@@ -11,6 +11,7 @@ namespace HousePrice.Api.Services
 	public interface IImporter
 	{
 		Task Import(string name, Stream csvStream);
+		Task Import(HousePrice priceRecord);
 	}
 	public class Importer : IImporter
 	{
@@ -26,7 +27,30 @@ namespace HousePrice.Api.Services
 			var configuration = builder.Build();
 
 			
-			_mongoContext = new MongoContext(configuration["connectionString"], "HousePrice");
+			_mongoContext = new MongoContext($"mongodb://{configuration["connectionString"]}", "HousePrice");
+		}
+
+		public async Task Import(HousePrice record)
+		{
+			await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
+			{
+				record.Postcode = record.Postcode.Replace(" ", String.Empty);
+				var locationData = PostcodeLookup.GetByPostcode(record.Postcode);
+				record.Location = locationData?.Latitude != null && locationData?.Longitude != null
+					? new Location(locationData?.Latitude, locationData?.Longitude)
+					: null;
+
+				try
+				{
+					await collection.InsertOneAsync(record);
+				}
+				catch (MongoWriteException ex)
+				{
+					Log.Warning(ex.Message);
+					throw;
+				}
+				
+			});
 		}
 
 		public async Task Import(string name, Stream csvStream)
@@ -48,11 +72,11 @@ namespace HousePrice.Api.Services
 							{
 								var record = csvReader.GetRecord<HousePrice>();
 								record.Postcode = record.Postcode.Replace(" ", String.Empty);
-								var locationData = PostcodeLookup.GetByPostcode(record.Postcode);
-								record.Location = locationData?.Latitude != null && locationData?.Longitude != null
-									? new Location(locationData?.Latitude, locationData?.Longitude)
-									: null;
-								batch.Add(record);
+								//var locationData = PostcodeLookup.GetByPostcode(record.Postcode);
+								//record.Location = locationData?.Latitude != null && locationData?.Longitude != null
+								//	? new Location(locationData?.Latitude, locationData?.Longitude)
+								//	: null;
+								//batch.Add(record);
 							}
 							catch (Exception e)
 							{

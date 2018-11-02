@@ -1,9 +1,11 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using HousePrice.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace HousePrice.WebAPi.Controllers
@@ -33,23 +35,48 @@ namespace HousePrice.WebAPi.Controllers
             {
                 Log.Information("Directory exists");
             }
-            return Ok(await _lookup.GetLookups(postcode, radius *1000));
+            return Ok(await _lookup.GetLookups(postcode.Replace(" ", string.Empty), radius *1000));
         }
 
         // POST api/values
         [HttpPost]
-        public async void Post(string importName, [FromBody] string transactions)
+        public async void Post()
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                using (var writer = new StreamWriter(memoryStream))
-                {
-                    writer.Write(transactions);
-                    await writer.FlushAsync();
-                    memoryStream.Position = 0;
-                    await _importer.Import(importName, memoryStream);
-                }
-            }
+			Log.Information("In Post");
+
+	        
+				using (var reader = new StreamReader(Request.Body))
+				{
+			
+					var body = await reader.ReadToEndAsync();
+					Log.Information(body);
+					try
+					{
+						var transaction = JsonConvert.DeserializeObject<Api.Services.HousePrice>(body);
+						await _importer.Import(transaction);
+					}
+					catch (Exception e)
+					{
+						Log.Error(e.Message);
+						throw;
+					}
+					
+					
+				}
+		
+
+			//using (var memoryStream = new MemoryStream())
+			//{
+			//	using (var writer = new StreamWriter(memoryStream))
+			//	{
+			//		writer.Write(transactions);
+			//		await writer.FlushAsync();
+			//		memoryStream.Position = 0;
+			//		await _importer.Import("Import chunk", memoryStream);
+			//	}
+			//}
+			//Log.Information($"Writing {JsonConvert.SerializeObject(priceRecord)}");
+	  //      await _importer.Import(priceRecord);
 
         }
 

@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using JetBrains.Annotations;
+using Serilog;
 
 namespace HousePrice.Api.ImportFileWatcher
 {
@@ -40,23 +42,46 @@ namespace HousePrice.Api.ImportFileWatcher
         
         private Dictionary<string, FileInfo> _lastState = new Dictionary<string, FileInfo>();
 
-        public void StartPolling(int timeout = 5000)
+        public void StartPolling(int timeout = 15000)
         {
             var timer = new Timer {Interval = timeout};
-            
-            _lastState = Directory.GetFiles(_watchPath)
+
+	        if (!Directory.Exists(_watchPath))
+	        {
+		        Log.Warning($"Can't find directory {_watchPath}");
+		        return;
+	        }
+
+	        _lastState = Directory.GetFiles(_watchPath)
                 .Select(f => new FileInfo(f))
                 .ToDictionary(k => k.FullName);
             
             timer.Elapsed += (sender, eventArgs) =>
             {
+				Log.Information($"Logging timer activated for {_watchPath}");
                 var currentFiles = Directory.GetFiles(_watchPath)
                     .Select(f => new FileInfo(f))
                     .ToDictionary(k => k.FullName);
-                
-                foreach (var watchedFileInfo in currentFiles.Values)
+
+				StringBuilder laststatemessage = new StringBuilder();
+
+	            foreach (var file in _lastState)
+	            {
+
+		            laststatemessage.AppendLine(file.Value.FullName);
+
+	            }
+	            StringBuilder currentstatemessage = new StringBuilder();
+	            foreach (var file in currentFiles)
+	            {
+		            currentstatemessage.AppendLine(file.Value.FullName);
+	            }
+
+				Log.Information($"Last state:\r\n{laststatemessage.ToString()} /r/nCurrent State:/r/n{currentstatemessage.ToString()}");
+
+	            foreach (var watchedFileInfo in currentFiles.Values)
                 {
-                    Console.WriteLine($"Processing {watchedFileInfo.Name}");
+                    Log.Information($"Processing dropped file {watchedFileInfo.Name}");
 
                     if (!_lastState.ContainsKey(watchedFileInfo.FullName))
                     {

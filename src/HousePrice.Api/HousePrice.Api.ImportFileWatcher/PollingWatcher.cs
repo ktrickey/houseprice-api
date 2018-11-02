@@ -30,7 +30,7 @@ namespace HousePrice.Api.ImportFileWatcher
 
         public void StartPolling()
         {
-            _watcher.EnableRaisingEvents = true;
+            //_watcher.EnableRaisingEvents = true;
 
             _poller.StartPolling();
         }

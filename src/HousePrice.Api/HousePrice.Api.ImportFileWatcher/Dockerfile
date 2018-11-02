@@ -16,6 +16,4 @@ RUN dotnet publish HousePrice.Api.ImportFileWatcher.csproj -c Release -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
-VOLUME /transactiondata
-VOLUME /postcodedata
-ENTRYPOINT ["dotnet", "HousePrice.WebAPi.dll"]
+ENTRYPOINT ["dotnet", "HousePrice.Api.ImportFileWatcher.dll"]

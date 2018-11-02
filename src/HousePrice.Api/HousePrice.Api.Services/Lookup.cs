@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
+using RestSharp;
 using Serilog;
 
 namespace HousePrice.Api.Services
@@ -29,10 +32,65 @@ namespace HousePrice.Api.Services
 	    Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius);
     }
 
-    public class Lookup : ILookup
+
+	[Serializable]
+	public class PostcodeData
+	{
+		private string _postcode;
+
+		public long Id { get; set; }
+
+		public string Postcode {get; set; }
+
+		public double? Latitude { get; set; }
+		public double? Longitude { get; set; }
+	}
+
+	public static class PostcodeLookup
+	{
+		private static RestClient lookupClient;
+		static PostcodeLookup()
+		{
+			var builder = new ConfigurationBuilder()
+				.SetBasePath(Directory.GetCurrentDirectory())
+				.AddJsonFile("appsettings.json")
+				.AddEnvironmentVariables();
+
+			var configuration = builder.Build();
+			var target = configuration["postcodelookupservicename"];
+			Log.Information($"postcode target is {target}");
+			lookupClient = new RestClient(target);
+
+		}
+		public static PostcodeData GetByPostcode(string postcode)
+		{
+			var response = lookupClient.Get<PostcodeData>(new RestRequest($"api/postcode/{WebUtility.UrlEncode(postcode)}"));
+			Log.Information($"Response code: {response.StatusCode}, {response.Content}");
+			if (response.IsSuccessful && response.StatusCode !=HttpStatusCode.NotFound)
+			{
+				var data = response.Data;
+				Log.Information($"Postcode:{data.Postcode}, lat:{data.Latitude}, long:{data.Longitude}");
+
+				return data;
+			}
+			else if (response.StatusCode == HttpStatusCode.NotFound)
+			{
+				Log.Information($"Postcode lookup for {postcode} not found");
+				return null;
+			}
+			else 
+			{
+				Log.Error($"Request failed, response code: {response.StatusCode}, {response.ErrorMessage}");
+				throw new HttpRequestException("Failed to access the postcode lookup service");
+			}
+		}
+	}
+
+	public class Lookup : ILookup
     {
 	    private readonly MongoContext _mongoContext;
-	    private string _postcodeDataLocation;
+
+	    private RestClient lookupClient;
 
 	    public Lookup()
         {
@@ -42,32 +100,38 @@ namespace HousePrice.Api.Services
 				.AddEnvironmentVariables();
 
 			var configuration = builder.Build();
-
-			
-			_mongoContext = new MongoContext(configuration["connectionString"], "HousePrice");
-	        _postcodeDataLocation = configuration["postcodeDataDirectory"];
+	        var target = configuration["postcodelookupservicename"];
+			Log.Information($"postcode target is {target}");
+	        lookupClient = new RestClient(target);
+	        var connection = $"mongodb://{configuration["connectionString"]}";
+			Log.Information($"MongoConnection: {connection}");
+	        _mongoContext = new MongoContext(connection, "HousePrice");
         }
 
-	    private T2 LogAccessTime<T1, T2>(Func<T1, T2> funcToTime, T1 arg, string logString)
+	    private T2 LogAccessTime<T1, T2>( Func<T1, T2> funcToTime, T1 arg, string logString)
 	    {
 		    var stopWatch = Stopwatch.StartNew();
 		    var result = funcToTime(arg);
 		    stopWatch.Stop();
 		    var elapsed = stopWatch.ElapsedMilliseconds;
-		    Log.Information(string.Format(logString, elapsed));
+		    Log.Information(string.Format(logString, elapsed.ToString()));
 
 		    return result;
 	    }
 
+
+
 	    public async Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius)
         {
-			Console.WriteLine("Starting retrieval...");
-	        var timer = Stopwatch.StartNew();
+			Log.Information("Starting retrieval postcode retrieval...");
+	        
             var postcodeInfo = LogAccessTime(PostcodeLookup.GetByPostcode, postcode, "Postcode lookup of lat and long took {0} milliseconds");
+	        var timer = Stopwatch.StartNew();
 	        if (postcodeInfo?.Longitude != null && postcodeInfo?.Latitude != null)
 	        {
 		        try
 		        {
+					Log.Information($"Sending request to Mongo...");
 			        var list = await _mongoContext.ExecuteAsync<HousePrice, PagedResult<HousePrice>>("Transactions",
 				        async (activeCollection) =>
 			        {
@@ -82,8 +146,12 @@ namespace HousePrice.Api.Services
 				       
 				        var query = activeCollection.Find(locationQuery);
 
-				        return new PagedResult<HousePrice>(100, await query.Sort(sort).Skip(0).Limit(25).ToListAsync());
-				        
+				        var result = new PagedResult<HousePrice>(100, await query.Sort(sort).Skip(0).Limit(25).ToListAsync());
+
+				        Log.Information($"Request to mongo successful");
+
+				        return result;
+
 			        });
 
 			        timer.Stop();
