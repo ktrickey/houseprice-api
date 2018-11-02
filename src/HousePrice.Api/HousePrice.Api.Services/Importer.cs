@@ -44,7 +44,7 @@ namespace HousePrice.Api.Services
 				{
 					await collection.InsertOneAsync(record);
 				}
-				catch (MongoWriteException ex)
+				catch (MongoException ex)
 				{
 					Log.Warning(ex.Message);
 					throw;
