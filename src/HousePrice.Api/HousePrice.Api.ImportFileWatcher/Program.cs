@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Coravel;
 using CsvHelper;
 using HousePrice.Api.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using RestSharp;
 using Serilog;
@@ -17,14 +17,66 @@ namespace HousePrice.Api.ImportFileWatcher
 {
     class Program
     {
-        static async Task Main()
+        private static readonly ManualResetEvent ResetEvent = new ManualResetEvent(false);
+
+        static FilePoller GetPoller(string watchDirectory, string processingDirectory,string successDirectory, RestClient client )
         {
-	        Log.Logger = new LoggerConfiguration()
-		        .MinimumLevel.Debug()
-		        .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-		        .Enrich.FromLogContext()
-		        .WriteTo.Console()
-		        .CreateLogger();
+            return new FilePoller(watchDirectory, async (f) =>
+            {
+                Log.Information($"Processing {f.FullName}");
+                var filename = $"{f.Name}-{Guid.NewGuid().ToString()}";
+                var processingFile = Path.Combine(processingDirectory, filename);
+
+                File.Move(f.FullName, processingFile);
+
+                using (var stream = new FileStream(processingFile, FileMode.Open, FileAccess.Read))
+                {
+                    using (var streamReader = new StreamReader(stream))
+                    {
+                        using (var csvReader = new CsvReader(streamReader))
+                        {
+                            csvReader.Configuration.HasHeaderRecord = false;
+                            csvReader.Configuration.RegisterClassMap<HousePriceMap>();
+                            while (await csvReader.ReadAsync())
+                            {
+                                var data = csvReader.GetRecord<Services.HousePrice>();
+                                Log.Debug(JsonConvert.SerializeObject(data));
+
+                                await AddToDB(f, data, client);
+                            }
+                        }
+                    }
+                }
+
+
+                var destFilename = Path.Combine(successDirectory, filename);
+
+                File.Move(processingFile, destFilename);
+
+            });
+
+        }
+        static void Main(string[] args)
+        {
+            var host = new HostBuilder()
+                .ConfigureAppConfiguration((hostContext, configApp) => { configApp.AddCommandLine(args); })
+                .ConfigureServices((hostContext, services) =>
+                {
+                    // Add Coravel's Scheduling...
+                    services.AddScheduler();
+                })
+                .Build();
+//
+//            var servicesProvider = new ServiceCollection()
+//                .AddScheduler()
+//                .BuildServiceProvider();
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
 
 
             var builder = new ConfigurationBuilder()
@@ -38,81 +90,46 @@ namespace HousePrice.Api.ImportFileWatcher
 
             var client = new RestClient(apiEndpoint);
 
-
-            //Monitor the drop directory for new files - Docker will map to file system as will k8s
-            // Filewatcher not reliable, especially in Linux Docker containers on Windows, therefore
-            // we'll have one going, but back it up with
-
-//            var watchDirectory = "/transaction_data/Import/Drop";
-//            var successDirectory = "/transaction_data/Import/Complete";
-
             var watchDirectory = configuration["watchDirectory"];
             var successDirectory = configuration["successDirectory"];
-			var processingDirectory = configuration["processingDirectory"];
+            var processingDirectory = configuration["processingDirectory"];
 
-            var watcher = new PollingWatcher( new FilePoller(watchDirectory, async (f) =>
-            {
-                Log.Information($"Processing {f.FullName}");
-	            var filename = $"{f.Name}-{Guid.NewGuid().ToString()}";
-	            var processingFile = Path.Combine(processingDirectory, filename);
-	
-	            File.Move(f.FullName, processingFile);
+           
+                // Configure the scheduled tasks....
+                host.Services.UseScheduler(scheduler =>
+                    {
+                        scheduler.OnWorker("FileWatcher");
+                        var poller = GetPoller(watchDirectory, processingDirectory, successDirectory, client);
+                        scheduler.Schedule(
+                                () =>
+                                {
+                                    Console.WriteLine("Stuff");
+                                    poller.CheckModifications();
+                                })
+                            .EveryMinute();
+                    }
+                );
 
-				using (var stream =  new FileStream(processingFile, FileMode.Open, FileAccess.Read))
-				{
-					using (var streamreader = new StreamReader(stream))
-					{
-						using (var csvReader = new CsvReader(streamreader))
-						{
+                // Run it!
+                host.Run();
 
-							csvReader.Configuration.HasHeaderRecord = false;
-							csvReader.Configuration.RegisterClassMap<HousePriceMap>();
-							while (await csvReader.ReadAsync())
-							{
-
-								var data = csvReader.GetRecord<Services.HousePrice>();
-								Log.Debug(JsonConvert.SerializeObject(data));
-
-
-
-								await AddToDB(f, data, client);
-
-							}
-
-						}
-					}
-
-				}
-
-	            var destFilename = Path.Combine(successDirectory, filename);
-
-                File.Move(processingFile, destFilename);
-            }));
-			Log.Information("Starting to poll...");
-            watcher.StartPolling();
-
-            while (true)
-            {
-
+                // ReSharper disable once FunctionNeverReturns
             }
+        
 
-            // ReSharper disable once FunctionNeverReturns
+        private static async Task AddToDB(FileInfo f, Services.HousePrice record, RestClient client)
+        {
+            var req = new RestRequest($"api/transaction");
+
+            req.AddParameter("application/json", JsonConvert.SerializeObject(record), ParameterType.RequestBody);
+            req.RequestFormat = DataFormat.Json;
+            Log.Information("Calling transaction import");
+            var result = await client.ExecutePostTaskAsync(req);
+            if (!result.IsSuccessful)
+            {
+                Log.Error(
+                    $"post failed, status: {result.StatusCode}, message:{result.ErrorMessage}, content: {result.Content}");
+            }
         }
-
-	    private static async Task AddToDB(FileInfo f, Services.HousePrice record, RestClient client)
-	    {
-		    var req = new RestRequest($"api/transaction");
-
-		    req.AddParameter("application/json", JsonConvert.SerializeObject(record), ParameterType.RequestBody);
-		    req.RequestFormat = DataFormat.Json;
-			Log.Information("Calling transaction import");
-		    var result = await client.ExecutePostTaskAsync(req);
-		    if (!result.IsSuccessful)
-		    {
-			    Log.Error($"post failed, status: {result.StatusCode}, message:{result.ErrorMessage}, content: {result.Content}");
-		    }
-
-
-	    }
     }
 }
