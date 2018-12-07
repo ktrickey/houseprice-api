@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.28010.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HousePrice.WebAPi", "HousePrice.WebAPi\HousePrice.WebAPi.csproj", "{7F91B762-FAEC-48E6-B05E-E64DE7508EF7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HousePrice.Api.ImportFileWatcher", "HousePrice.Api.ImportFileWatcher\HousePrice.Api.ImportFileWatcher.csproj", "{BF6B10A5-D288-447B-8644-628985172605}"
-EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{CD04B6F6-838F-45E7-A18D-2A11E23847EE}"
 EndProject
 Global
@@ -19,10 +17,6 @@ Global
 		{7F91B762-FAEC-48E6-B05E-E64DE7508EF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F91B762-FAEC-48E6-B05E-E64DE7508EF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F91B762-FAEC-48E6-B05E-E64DE7508EF7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BF6B10A5-D288-447B-8644-628985172605}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BF6B10A5-D288-447B-8644-628985172605}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BF6B10A5-D288-447B-8644-628985172605}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BF6B10A5-D288-447B-8644-628985172605}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CD04B6F6-838F-45E7-A18D-2A11E23847EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CD04B6F6-838F-45E7-A18D-2A11E23847EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD04B6F6-838F-45E7-A18D-2A11E23847EE}.Release|Any CPU.ActiveCfg = Release|Any CPU

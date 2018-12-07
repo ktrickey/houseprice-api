@@ -25,7 +25,6 @@ namespace HousePrice.WebAPi.Controllers
             _lookup = lookup;
         }
         [Route("{postcode}/{radius}")]
-        // GET api/values/5
         [HttpGet]
         public async Task<ActionResult<IEnumerable<HousePrice>>> Get(string postcode, double radius)
         {
@@ -43,41 +42,22 @@ namespace HousePrice.WebAPi.Controllers
         public async void Post()
         {
 			Log.Information("In Post");
-
 	        
-				using (var reader = new StreamReader(Request.Body))
+			using (var reader = new StreamReader(Request.Body))
+			{
+				var body = await reader.ReadToEndAsync();
+				Log.Information(body);
+				try
 				{
-			
-					var body = await reader.ReadToEndAsync();
-					Log.Information(body);
-					try
-					{
-						var transaction = JsonConvert.DeserializeObject<HousePrice>(body);
-						await _importer.Import(transaction);
-					}
-					catch (Exception e)
-					{
-						Log.Error(e.Message);
-						throw;
-					}
-					
-					
+					var transaction = JsonConvert.DeserializeObject<HousePrice>(body);
+					await _importer.Import(transaction);
 				}
-		
-
-			//using (var memoryStream = new MemoryStream())
-			//{
-			//	using (var writer = new StreamWriter(memoryStream))
-			//	{
-			//		writer.Write(transactions);
-			//		await writer.FlushAsync();
-			//		memoryStream.Position = 0;
-			//		await _importer.Import("Import chunk", memoryStream);
-			//	}
-			//}
-			//Log.Information($"Writing {JsonConvert.SerializeObject(priceRecord)}");
-	  //      await _importer.Import(priceRecord);
-
+				catch (Exception e)
+				{
+					Log.Error(e.Message);
+					throw;
+				}
+			}
         }
 
         // PUT api/values/5
