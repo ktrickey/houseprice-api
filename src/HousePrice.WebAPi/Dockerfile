@@ -1,17 +1,16 @@
-FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
+FROM microsoft/dotnet:2.1-aspnetcore-runtime-alpine AS base
 WORKDIR /app
 
-FROM microsoft/dotnet:2.1-sdk AS build
+FROM microsoft/dotnet:2.1-sdk-alpine AS build
 WORKDIR /src
-COPY HousePrice.WebAPi/HousePrice.WebAPi.csproj HousePrice.WebAPi/
-COPY HousePrice.Api.Services/HousePrice.Api.Services.csproj HousePrice.Api.Services/
-RUN dotnet restore HousePrice.WebAPi/HousePrice.WebAPi.csproj
+COPY ["HousePrice.WebAPi/HousePrice.WebAPi.csproj", "HousePrice.WebAPi/"]
+RUN dotnet restore "HousePrice.WebAPi/HousePrice.WebAPi.csproj"
 COPY . .
 WORKDIR /src/HousePrice.WebAPi
-RUN dotnet build HousePrice.WebAPi.csproj -c Release -o /app
+RUN dotnet build "HousePrice.WebAPi.csproj" -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish HousePrice.WebAPi.csproj -c Release -o /app
+RUN dotnet publish "HousePrice.WebAPi.csproj" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
