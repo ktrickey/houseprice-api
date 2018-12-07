@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using HousePrice.WebAPi;
+using HousePrice.Api.Services;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Serilog;
 
-namespace HousePrice.Api.Services
+namespace HousePrice.WebAPi
 {
 	public interface IImporter
 	{
 		Task Import(string name, Stream csvStream);
-		Task Import(HousePrice priceRecord);
+		Task Import(WebAPi.HousePrice priceRecord);
 	}
 	public class Importer : IImporter
 	{
@@ -31,9 +31,9 @@ namespace HousePrice.Api.Services
 			_mongoContext = new MongoContext($"mongodb://{configuration["connectionString"]}", "HousePrice");
 		}
 
-		public async Task Import(HousePrice record)
+		public async Task Import(WebAPi.HousePrice record)
 		{
-			await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
+			await _mongoContext.ExecuteActionAsync<WebAPi.HousePrice>("Transactions", async (collection) =>
 			{
 				record.Postcode = record.Postcode.Replace(" ", String.Empty);
 				var locationData = PostcodeLookup.GetByPostcode(record.Postcode);
@@ -56,7 +56,7 @@ namespace HousePrice.Api.Services
 
 		public async Task Import(string name, Stream csvStream)
 		{
-			await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
+			await _mongoContext.ExecuteActionAsync<WebAPi.HousePrice>("Transactions", async (collection) =>
 			{
 				using (var streamReader = new StreamReader(csvStream))
 				{
@@ -65,13 +65,13 @@ namespace HousePrice.Api.Services
 
 						csvReader.Configuration.HasHeaderRecord = false;
 						csvReader.Configuration.RegisterClassMap<HousePriceMap>();
-						var batch = new List<HousePrice>();
+						var batch = new List<WebAPi.HousePrice>();
 
 						while (csvReader.Read())
 						{
 							try
 							{
-								var record = csvReader.GetRecord<HousePrice>();
+								var record = csvReader.GetRecord<WebAPi.HousePrice>();
 								record.Postcode = record.Postcode.Replace(" ", String.Empty);
 								//var locationData = PostcodeLookup.GetByPostcode(record.Postcode);
 								//record.Location = locationData?.Latitude != null && locationData?.Longitude != null
@@ -100,10 +100,10 @@ namespace HousePrice.Api.Services
 
 		public async Task AddIndex()
 		{
-			var housePriceBuilder = Builders<HousePrice>.IndexKeys;
-			var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Geo2DSphere(x=>x.Location));
+			var housePriceBuilder = Builders<WebAPi.HousePrice>.IndexKeys;
+			var indexModel = new CreateIndexModel<WebAPi.HousePrice>(housePriceBuilder.Geo2DSphere(x=>x.Location));
 
-			await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
+			await _mongoContext.ExecuteActionAsync<WebAPi.HousePrice>("Transactions", async (collection) =>
 			{
 				await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
 			});
@@ -111,10 +111,10 @@ namespace HousePrice.Api.Services
 
 		public async Task AddPostcodeIndex()
 		{
-			var housePriceBuilder = Builders<HousePrice>.IndexKeys;
-			var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Ascending(x=>x.Postcode));
+			var housePriceBuilder = Builders<WebAPi.HousePrice>.IndexKeys;
+			var indexModel = new CreateIndexModel<WebAPi.HousePrice>(housePriceBuilder.Ascending(x=>x.Postcode));
 
-			await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
+			await _mongoContext.ExecuteActionAsync<WebAPi.HousePrice>("Transactions", async (collection) =>
 			{
 				await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
 			});
@@ -122,10 +122,10 @@ namespace HousePrice.Api.Services
 
 		public async Task AddTransferDateIndex()
 		{
-			var housePriceBuilder = Builders<HousePrice>.IndexKeys;
-			var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Ascending(x=>x.TransferDate));
+			var housePriceBuilder = Builders<WebAPi.HousePrice>.IndexKeys;
+			var indexModel = new CreateIndexModel<WebAPi.HousePrice>(housePriceBuilder.Ascending(x=>x.TransferDate));
 
-			await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
+			await _mongoContext.ExecuteActionAsync<WebAPi.HousePrice>("Transactions", async (collection) =>
 			{
 				await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
 			});

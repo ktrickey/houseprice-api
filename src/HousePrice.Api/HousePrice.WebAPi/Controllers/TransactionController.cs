@@ -27,7 +27,7 @@ namespace HousePrice.WebAPi.Controllers
         [Route("{postcode}/{radius}")]
         // GET api/values/5
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Api.Services.HousePrice>>> Get(string postcode, double radius)
+        public async Task<ActionResult<IEnumerable<HousePrice>>> Get(string postcode, double radius)
         {
 			Log.Information($"Processing request for {postcode} within {radius} km");
 
@@ -52,7 +52,7 @@ namespace HousePrice.WebAPi.Controllers
 					Log.Information(body);
 					try
 					{
-						var transaction = JsonConvert.DeserializeObject<Api.Services.HousePrice>(body);
+						var transaction = JsonConvert.DeserializeObject<HousePrice>(body);
 						await _importer.Import(transaction);
 					}
 					catch (Exception e)

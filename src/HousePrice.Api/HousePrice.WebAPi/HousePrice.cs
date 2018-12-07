@@ -1,7 +1,8 @@
 ﻿using System;
+using HousePrice.Api.Services;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace HousePrice.Api.Services
+namespace HousePrice.WebAPi
 {
 	public class HousePrice
 	{

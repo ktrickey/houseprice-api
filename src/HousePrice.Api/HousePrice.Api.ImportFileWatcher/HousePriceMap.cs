@@ -2,7 +2,7 @@
 
 namespace HousePrice.Api.Services
 {
-	public sealed class HousePriceMap : ClassMap<HousePrice>
+	public sealed class HousePriceMap : ClassMap<ImportFileWatcher.HousePrice>
 	{
 		public HousePriceMap()
 		{

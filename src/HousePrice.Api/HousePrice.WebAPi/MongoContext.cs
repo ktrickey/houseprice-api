@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 
-namespace HousePrice.Api.Services
+namespace HousePrice.WebAPi
 {
 	public class MongoContext
 	{

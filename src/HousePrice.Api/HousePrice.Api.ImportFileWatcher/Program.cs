@@ -39,7 +39,7 @@ namespace HousePrice.Api.ImportFileWatcher
                             csvReader.Configuration.RegisterClassMap<HousePriceMap>();
                             while (await csvReader.ReadAsync())
                             {
-                                var data = csvReader.GetRecord<Services.HousePrice>();
+                                var data = csvReader.GetRecord<HousePrice>();
                                 Log.Debug(JsonConvert.SerializeObject(data));
 
                                 await AddToDB(f, data, client);
@@ -117,7 +117,7 @@ namespace HousePrice.Api.ImportFileWatcher
             }
         
 
-        private static async Task AddToDB(FileInfo f, Services.HousePrice record, RestClient client)
+        private static async Task AddToDB(FileInfo f, HousePrice record, RestClient client)
         {
             var req = new RestRequest($"api/transaction");
 

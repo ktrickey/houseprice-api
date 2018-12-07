@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using HousePrice.WebAPi;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -29,7 +30,7 @@ namespace HousePrice.Api.Services
 	}
     public interface ILookup
     {
-	    Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius);
+	    Task<PagedResult<WebAPi.HousePrice>> GetLookups(string postcode, double radius);
     }
 
 
@@ -120,7 +121,7 @@ namespace HousePrice.Api.Services
 
 
 
-	    public async Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius)
+	    public async Task<PagedResult<WebAPi.HousePrice>> GetLookups(string postcode, double radius)
         {
 			Log.Information("Starting retrieval postcode retrieval...");
 	        
@@ -131,21 +132,21 @@ namespace HousePrice.Api.Services
 		        try
 		        {
 					Log.Information($"Sending request to Mongo...");
-			        var list = await _mongoContext.ExecuteAsync<HousePrice, PagedResult<HousePrice>>("Transactions",
+			        var list = await _mongoContext.ExecuteAsync<WebAPi.HousePrice, PagedResult<WebAPi.HousePrice>>("Transactions",
 				        async (activeCollection) =>
 			        {
 				        var locationQuery =
-					        new FilterDefinitionBuilder<HousePrice>().GeoWithinCenterSphere(
+					        new FilterDefinitionBuilder<WebAPi.HousePrice>().GeoWithinCenterSphere(
 						        tag => tag.Location,
 						        postcodeInfo.Longitude.Value,
 						        postcodeInfo.Latitude.Value,
 						        (radius / 1000) / 6371);
 				      
-						var sort = new SortDefinitionBuilder<HousePrice>().Descending(x => x.TransferDate);
+						var sort = new SortDefinitionBuilder<WebAPi.HousePrice>().Descending(x => x.TransferDate);
 				       
 				        var query = activeCollection.Find(locationQuery);
 
-				        var result = new PagedResult<HousePrice>(100, await query.Sort(sort).Skip(0).Limit(25).ToListAsync());
+				        var result = new PagedResult<WebAPi.HousePrice>(100, await query.Sort(sort).Skip(0).Limit(25).ToListAsync());
 
 				        Log.Information($"Request to mongo successful");
 
@@ -164,7 +165,7 @@ namespace HousePrice.Api.Services
 		        }
 	        }
 
-	        return new PagedResult<HousePrice>(0, new HousePrice[0]);
+	        return new PagedResult<WebAPi.HousePrice>(0, new WebAPi.HousePrice[0]);
         }
     }
 }

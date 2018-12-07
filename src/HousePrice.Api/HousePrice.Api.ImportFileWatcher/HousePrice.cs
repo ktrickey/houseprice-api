@@ -1,7 +1,6 @@
 ﻿using System;
-using HousePrice.Api.ImportFileWatcher;
 
-namespace HousePrice.Api.Services
+namespace HousePrice.Api.ImportFileWatcher
 {
 	public class HousePrice
 	{

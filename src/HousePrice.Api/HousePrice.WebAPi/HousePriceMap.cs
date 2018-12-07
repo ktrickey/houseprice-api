@@ -2,7 +2,7 @@
 
 namespace HousePrice.WebAPi
 {
-	public sealed class HousePriceMap : ClassMap<Api.Services.HousePrice>
+	public sealed class HousePriceMap : ClassMap<HousePrice>
 	{
 		public HousePriceMap()
 		{

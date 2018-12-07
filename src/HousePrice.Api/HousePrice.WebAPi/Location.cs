@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace HousePrice.Api.Services
+namespace HousePrice.WebAPi
 {
 	public class Location
 	{
