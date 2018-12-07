@@ -36,7 +36,6 @@ namespace HousePrice.Api.Services
 	[Serializable]
 	public class PostcodeData
 	{
-		private string _postcode;
 
 		public long Id { get; set; }
 

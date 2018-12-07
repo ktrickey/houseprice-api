@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 using JetBrains.Annotations;
 using Serilog;
@@ -30,34 +29,31 @@ namespace HousePrice.Api.ImportFileWatcher
             _onFileDelete = onFileDelete;
             _onSuccess = onSuccess;
             _onError = onError;
+            
+            if (!Directory.Exists(_watchPath))
+            {
+                Log.Warning($"Can't find directory {_watchPath}");
+                return;
+            }
+
+            _lastState = Directory.GetFiles(_watchPath)
+                .Select(f => new FileInfo(f))
+                .ToDictionary(k => k.FullName);
+
            
         }
-
-//        public string FilePath => _watchPath;
-//        public Action<FileInfo> OnFileCreate => _onFileCreate;
-//        public Action<FileInfo> OnFileModify => _onFileModify;
-//        public Action<FileInfo> OnFileDelete => _onFileDelete;
 
         private DateTime _lastSnapShot = DateTime.MinValue;
         
         private Dictionary<string, FileInfo> _lastState = new Dictionary<string, FileInfo>();
 
-        public void StartPolling(int timeout = 15000)
+        public void CheckModifications()
         {
-            var timer = new Timer {Interval = timeout};
+           // var timer = new Timer {Interval = timeout};
 
-	        if (!Directory.Exists(_watchPath))
-	        {
-		        Log.Warning($"Can't find directory {_watchPath}");
-		        return;
-	        }
-
-	        _lastState = Directory.GetFiles(_watchPath)
-                .Select(f => new FileInfo(f))
-                .ToDictionary(k => k.FullName);
-            
-            timer.Elapsed += (sender, eventArgs) =>
-            {
+	
+//            timer.Elapsed += (sender, eventArgs) =>
+//            {
 				Log.Information($"Logging timer activated for {_watchPath}");
                 var currentFiles = Directory.GetFiles(_watchPath)
                     .Select(f => new FileInfo(f))
@@ -119,11 +115,11 @@ namespace HousePrice.Api.ImportFileWatcher
 
                 _lastState = currentFiles;
 
-            };
+//            };
    
-
-            timer.Enabled = true;
-
+//
+//            timer.Enabled = true;
+//
 
         // ReSharper disable once FunctionNeverReturns
         }

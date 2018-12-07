@@ -17,9 +17,10 @@ namespace HousePrice.Api.ImportFileWatcher.Tests
 
         private async Task ModifyFile(string fileName)
         {
-            using (var writer = new StreamWriter(fileName))
+            using (var writer = new StreamWriter(fileName, true))
             {
                 await writer.WriteAsync("More of my stuff");
+                await writer.FlushAsync();
             }
         }
 
@@ -69,8 +70,8 @@ namespace HousePrice.Api.ImportFileWatcher.Tests
             });
 
             poller.StartPolling(10);
+            await Task.Delay(20);
             await ModifyFile(filename);
-
 
             await Task.Delay(30);
             Assert.True(callReceived);
