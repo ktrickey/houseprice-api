@@ -1,17 +1,17 @@
-FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
+FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
 WORKDIR /app
 
-FROM microsoft/dotnet:2.1-sdk AS build
+FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /src
-COPY HousePrice.Api.ImportFileWatcher/HousePrice.Api.ImportFileWatcher.csproj HousePrice.Api.ImportFileWatcher/
-COPY HousePrice.Api.Services/HousePrice.Api.Services.csproj HousePrice.Api.Services/
-RUN dotnet restore  HousePrice.Api.ImportFileWatcher/HousePrice.Api.ImportFileWatcher.csproj
+COPY ["HousePrice.Api.ImportFileWatcher/HousePrice.Api.ImportFileWatcher.csproj", "HousePrice.Api.ImportFileWatcher/"]
+COPY ["HousePrice.Api.Services/HousePrice.Api.Services.csproj", "HousePrice.Api.Services/"]
+RUN dotnet restore  "HousePrice.Api.ImportFileWatcher/HousePrice.Api.ImportFileWatcher.csproj"
 COPY . .
-WORKDIR /src/HousePrice.Api.ImportFileWatcher
-RUN dotnet build HousePrice.Api.ImportFileWatcher.csproj -c Release -o /app
+WORKDIR "/src/HousePrice.Api.ImportFileWatcher"
+RUN dotnet build "HousePrice.Api.ImportFileWatcher.csproj" -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish HousePrice.Api.ImportFileWatcher.csproj -c Release -o /app
+RUN dotnet publish "HousePrice.Api.ImportFileWatcher.csproj" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
