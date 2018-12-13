@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RestSharp;
 
 namespace HousePrice.WebAPi
 {
@@ -29,10 +30,27 @@ namespace HousePrice.WebAPi
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddScoped<IImporter, Importer>();
-            services.AddScoped<ILookup, Lookup>();
+            services.AddScoped<IHousePriceLookup, HousePriceLookup>();
             var connection = new MongoConnection($"mongodb://{Configuration["connectionString"]}",
                 "HousePrice");
             services.AddSingleton<IMongoConnection>(connection);
+
+            services.AddScoped<IRestClient, RestClient>();
+
+            services.AddScoped<IPostcodeLookupConfig, PostcodeLookupConfig>((ctx) =>
+            {
+                var restClient = ctx.GetService<IRestClient>();
+
+                return new PostcodeLookupConfig(restClient, Configuration["postcodelookupservicename"]);
+            });
+
+            services.AddScoped<IHousePriceLookupConfig, HousePriceLookupConfig>((ctx) =>
+            {
+                var restClient = ctx.GetService<IRestClient>();
+
+                return new HousePriceLookupConfig(restClient, Configuration["postcodelookupservicename"],
+                    ctx.GetService<IMongoContext>(), ctx.GetService<IPostcodeLookup>());
+            });
 
 
             services.AddScoped<IMongoContext, MongoContext>();
@@ -50,7 +68,8 @@ namespace HousePrice.WebAPi
             {
                 app.UseHsts();
             }
-          //  app.UseHttpsRedirection();
+
+            //  app.UseHttpsRedirection();
             app.UseMvc();
         }
     }

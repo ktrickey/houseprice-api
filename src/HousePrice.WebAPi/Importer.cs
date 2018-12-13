@@ -18,10 +18,12 @@ namespace HousePrice.WebAPi
     public class Importer : IImporter
     {
         private readonly IMongoContext _mongoContext;
+        private readonly IPostcodeLookup _postcodeLookup;
 
-        public Importer(IMongoContext context)
+        public Importer(IMongoContext context, IPostcodeLookup postcodeLookup)
         {
             _mongoContext = context;
+            _postcodeLookup = postcodeLookup;
         }
 
         public async Task Import(HousePrice record)
@@ -29,7 +31,7 @@ namespace HousePrice.WebAPi
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
             {
                 record.Postcode = record.Postcode.Replace(" ", String.Empty);
-                var locationData = PostcodeLookup.GetByPostcode(record.Postcode);
+                var locationData = _postcodeLookup.GetByPostcode(record.Postcode);
                 record.Location = locationData?.Latitude != null && locationData?.Longitude != null
                     ? new Location(locationData?.Latitude, locationData?.Longitude)
                     : null;

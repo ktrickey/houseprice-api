@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using HousePrice.WebAPi;
 using Microsoft.Extensions.Configuration;
@@ -25,11 +26,25 @@ namespace HousePrice.Api.Services
         public long TotalRows => _totalRows;
         public IEnumerable<T> Results => _results;
     }
-    public interface ILookup
+    public interface IHousePriceLookup
     {
         Task<PagedResult<WebAPi.HousePrice>> GetLookups(string postcode, double radius);
     }
 
+    public interface IPostcodeLookupConfig
+    {
+        IRestClient RestClient { get; }
+    }
+
+    public class PostcodeLookupConfig : IPostcodeLookupConfig
+    {
+        public PostcodeLookupConfig(IRestClient client, string postcodeServiceName)
+        {
+            RestClient = client;
+            RestClient.BaseUrl = new Uri(postcodeServiceName);
+        }
+        public IRestClient RestClient { get; }
+    }
 
     [Serializable]
     public class PostcodeData
@@ -40,23 +55,39 @@ namespace HousePrice.Api.Services
         public double? Longitude { get; set; }
     }
 
-    public static class PostcodeLookup
+    public interface IPostcodeLookup
     {
-        private static RestClient lookupClient;
-        static PostcodeLookup()
+        PostcodeData GetByPostcode(string postcode);
+    }
+
+    public interface IHousePriceLookupConfig
+    {
+        IRestClient RestClient { get; }
+        IMongoContext MongoContext { get; }
+        IPostcodeLookup PostcodeLookup { get; }
+    }
+    public class HousePriceLookupConfig : IHousePriceLookupConfig
+    {
+        public HousePriceLookupConfig(IRestClient client, string postcodeServiceName, IMongoContext mongoContext, IPostcodeLookup postcodeLookup)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .AddEnvironmentVariables();
-
-            var configuration = builder.Build();
-            var target = configuration["postcodelookupservicename"];
-            Log.Information($"postcode target is {target}");
-            lookupClient = new RestClient(target);
-
+            RestClient = client;
+            RestClient.BaseUrl = new Uri(postcodeServiceName);
+            MongoContext = mongoContext;
+            PostcodeLookup = postcodeLookup;
         }
-        public static PostcodeData GetByPostcode(string postcode)
+        public IRestClient RestClient { get; }
+        public IMongoContext MongoContext { get; }
+        public IPostcodeLookup PostcodeLookup { get; }
+    }
+
+    public class PostcodeLookup : IPostcodeLookup
+    {
+        private IRestClient lookupClient;
+        public PostcodeLookup(IPostcodeLookupConfig config)
+        {
+            lookupClient = config.RestClient;
+        }
+        public PostcodeData GetByPostcode(string postcode)
         {
             var response = lookupClient.Get<PostcodeData>(new RestRequest($"api/postcode/{WebUtility.UrlEncode(postcode)}"));
             Log.Information($"Response code: {response.StatusCode}, {response.Content}");
@@ -80,18 +111,18 @@ namespace HousePrice.Api.Services
         }
     }
 
-    public class Lookup : ILookup
+    public class HousePriceLookup : IHousePriceLookup
     {
         private readonly IMongoContext _mongoContext;
+        private readonly IPostcodeLookup _postcodeLookup;
 
-        private RestClient lookupClient;
+        private IRestClient _lookupClient;
 
-        public Lookup(IConfiguration configuration, IMongoContext mongoContext)
+        public HousePriceLookup(IHousePriceLookupConfig config)
         {
-            var target = configuration["postcodelookupservicename"];
-            Log.Information($"postcode target is {target}");
-            lookupClient = new RestClient(target);
-            _mongoContext = mongoContext;
+            _lookupClient = config.RestClient;
+            _mongoContext = config.MongoContext;
+            _postcodeLookup = config.PostcodeLookup;
         }
 
         private T2 LogAccessTime<T1, T2>( Func<T1, T2> funcToTime, T1 arg, string logString)
@@ -105,13 +136,11 @@ namespace HousePrice.Api.Services
             return result;
         }
 
-
-
         public async Task<PagedResult<WebAPi.HousePrice>> GetLookups(string postcode, double radius)
         {
             Log.Information("Starting retrieval postcode retrieval...");
 
-            var postcodeInfo = LogAccessTime(PostcodeLookup.GetByPostcode, postcode, "Postcode lookup of lat and long took {0} milliseconds");
+            var postcodeInfo = LogAccessTime(_postcodeLookup.GetByPostcode, postcode, "Postcode lookup of lat and long took {0} milliseconds");
             var timer = Stopwatch.StartNew();
             if (postcodeInfo?.Longitude != null && postcodeInfo?.Latitude != null)
             {

@@ -16,9 +16,9 @@ namespace HousePrice.WebAPi.Controllers
     public class TransactionController : ControllerBase
     {
         private readonly IImporter _importer;
-        private readonly ILookup _lookup;
+        private readonly IHousePriceLookup _lookup;
 
-        public TransactionController(IImporter importer, ILookup lookup)
+        public TransactionController(IImporter importer, IHousePriceLookup lookup)
         {
             _importer = importer;
             _lookup = lookup;
