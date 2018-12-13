@@ -1,5 +1,4 @@
-﻿using System;
-using HousePrice.Api.Services;
+﻿using HousePrice.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +9,6 @@ using RestSharp;
 namespace HousePrice.WebAPi
 {
     public class Startup
-
     {
         public Startup(IHostingEnvironment env)
         {
@@ -21,9 +19,7 @@ namespace HousePrice.WebAPi
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
         }
-
-
-        private IConfiguration Configuration { get; }
+       private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -44,13 +40,8 @@ namespace HousePrice.WebAPi
                 return new PostcodeLookupConfig(restClient, Configuration["postcodelookupservicename"]);
             });
 
-            services.AddScoped<IHousePriceLookupConfig, HousePriceLookupConfig>((ctx) =>
-            {
-                var restClient = ctx.GetService<IRestClient>();
-
-                return new HousePriceLookupConfig(restClient, Configuration["postcodelookupservicename"],
-                    ctx.GetService<IMongoContext>(), ctx.GetService<IPostcodeLookup>());
-            });
+            services.AddScoped<IHousePriceLookupConfig, HousePriceLookupConfig>((ctx) => new HousePriceLookupConfig(
+                ctx.GetService<IMongoContext>(), ctx.GetService<IPostcodeLookup>()));
 
 
             services.AddScoped<IMongoContext, MongoContext>();
