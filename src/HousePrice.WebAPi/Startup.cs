@@ -1,4 +1,5 @@
-﻿using HousePrice.Api.Services;
+﻿using System;
+using HousePrice.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ namespace HousePrice.WebAPi
         }
 
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -29,8 +30,13 @@ namespace HousePrice.WebAPi
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddScoped<IImporter, Importer>();
             services.AddScoped<ILookup, Lookup>();
+            var connection = new MongoConnection($"mongodb://{Configuration["connectionString"]}",
+                "HousePrice");
+            services.AddSingleton<IMongoConnection>(connection);
 
-            //PostcodeLookup.GetByPostcode("");
+
+            services.AddScoped<IMongoContext, MongoContext>();
+            services.AddSingleton(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

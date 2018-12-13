@@ -17,19 +17,11 @@ namespace HousePrice.WebAPi
 
     public class Importer : IImporter
     {
-        private readonly MongoContext _mongoContext;
+        private readonly IMongoContext _mongoContext;
 
-        public Importer()
+        public Importer(IMongoContext context)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .AddEnvironmentVariables();
-
-            var configuration = builder.Build();
-
-
-            _mongoContext = new MongoContext($"mongodb://{configuration["connectionString"]}", "HousePrice");
+            _mongoContext = context;
         }
 
         public async Task Import(HousePrice record)

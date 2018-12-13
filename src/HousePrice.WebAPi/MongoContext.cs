@@ -4,16 +4,43 @@ using MongoDB.Driver;
 
 namespace HousePrice.WebAPi
 {
-    public class MongoContext
+    public interface IMongoContext
+    {
+        Task<TOut> ExecuteAsync<TIn, TOut>(string collectionName,Func<IMongoCollection<TIn>, Task<TOut>> func);
+        Task<TOut> ExecuteAsync<TIn, TOut>(string databaseName, string collectionName,Func<IMongoCollection<TIn>, Task<TOut>> func);
+        Task<TOut> ExecuteAsync<TOut>(IMongoDatabase database, Func<IMongoDatabase, Task<TOut>> func);
+        Task ExecuteActionAsync<TIn>(string collectionName,  Func<IMongoCollection<TIn>, Task> action);
+        Task ExecuteActionAsync<TIn>(IMongoCollection<TIn> collection,  Func<IMongoCollection<TIn>, Task> action);
+    }
+
+    public interface IMongoConnection
+    {
+        string ConnectionString { get; }
+        string DatabaseName { get; }
+
+    }
+
+    public class MongoConnection : IMongoConnection
+    {
+        public MongoConnection(string connectionString, string databaseName)
+        {
+            ConnectionString = connectionString;
+            DatabaseName = databaseName;
+        }
+        public string ConnectionString { get; }
+        public string DatabaseName { get; }
+    }
+
+    public class MongoContext : IMongoContext
     {
 
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
 
-        public MongoContext(string connectionString, string databaseName)
+        public MongoContext(IMongoConnection connection)
         {
-            _client = GetClient(connectionString);
-            _database = GetDatabase(databaseName);
+            _client = GetClient(connection.ConnectionString);
+            _database = GetDatabase(connection.DatabaseName);
         }
 
         private IMongoClient GetClient(string mongoConnection)

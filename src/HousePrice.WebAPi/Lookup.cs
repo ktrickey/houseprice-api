@@ -82,24 +82,16 @@ namespace HousePrice.Api.Services
 
     public class Lookup : ILookup
     {
-        private readonly MongoContext _mongoContext;
+        private readonly IMongoContext _mongoContext;
 
         private RestClient lookupClient;
 
-        public Lookup()
+        public Lookup(IConfiguration configuration, IMongoContext mongoContext)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .AddEnvironmentVariables();
-
-            var configuration = builder.Build();
             var target = configuration["postcodelookupservicename"];
             Log.Information($"postcode target is {target}");
             lookupClient = new RestClient(target);
-            var connection = $"mongodb://{configuration["connectionString"]}";
-            Log.Information($"MongoConnection: {connection}");
-            _mongoContext = new MongoContext(connection, "HousePrice");
+            _mongoContext = mongoContext;
         }
 
         private T2 LogAccessTime<T1, T2>( Func<T1, T2> funcToTime, T1 arg, string logString)
