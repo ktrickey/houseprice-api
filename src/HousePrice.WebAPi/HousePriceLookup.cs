@@ -1,114 +1,16 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using HousePrice.WebAPi;
-using Microsoft.Extensions.Configuration;
+using HousePrice.Api.Services;
 using MongoDB.Driver;
 using RestSharp;
 using Serilog;
 
-namespace HousePrice.Api.Services
+namespace HousePrice.WebAPi
 {
-    public class PagedResult<T>
-    {
-        public PagedResult(long totalRows, IEnumerable<T> results)
-        {
-            _totalRows = totalRows;
-            _results = results;
-        }
-        private readonly long _totalRows;
-        private readonly IEnumerable<T> _results;
-        public long TotalRows => _totalRows;
-        public IEnumerable<T> Results => _results;
-    }
     public interface IHousePriceLookup
     {
         Task<PagedResult<WebAPi.HousePrice>> GetLookups(string postcode, double radius);
-    }
-
-    public interface IPostcodeLookupConfig
-    {
-        IRestClient RestClient { get; }
-    }
-
-    public class PostcodeLookupConfig : IPostcodeLookupConfig
-    {
-        public PostcodeLookupConfig(IRestClient client, string postcodeServiceName)
-        {
-            RestClient = client;
-            RestClient.BaseUrl = new Uri(postcodeServiceName);
-        }
-        public IRestClient RestClient { get; }
-    }
-
-    [Serializable]
-    public class PostcodeData
-    {
-        public long Id { get; set; }
-        public string Postcode {get; set; }
-        public double? Latitude { get; set; }
-        public double? Longitude { get; set; }
-    }
-
-    public interface IPostcodeLookup
-    {
-        PostcodeData GetByPostcode(string postcode);
-    }
-
-    public interface IHousePriceLookupConfig
-    {
-        IRestClient RestClient { get; }
-        IMongoContext MongoContext { get; }
-        IPostcodeLookup PostcodeLookup { get; }
-    }
-    public class HousePriceLookupConfig : IHousePriceLookupConfig
-    {
-        public HousePriceLookupConfig(IRestClient client, string postcodeServiceName, IMongoContext mongoContext, IPostcodeLookup postcodeLookup)
-        {
-            RestClient = client;
-            RestClient.BaseUrl = new Uri(postcodeServiceName);
-            MongoContext = mongoContext;
-            PostcodeLookup = postcodeLookup;
-        }
-        public IRestClient RestClient { get; }
-        public IMongoContext MongoContext { get; }
-        public IPostcodeLookup PostcodeLookup { get; }
-    }
-
-    public class PostcodeLookup : IPostcodeLookup
-    {
-        private IRestClient lookupClient;
-        public PostcodeLookup(IPostcodeLookupConfig config)
-        {
-            lookupClient = config.RestClient;
-        }
-        public PostcodeData GetByPostcode(string postcode)
-        {
-            var response = lookupClient.Get<PostcodeData>(new RestRequest($"api/postcode/{WebUtility.UrlEncode(postcode)}"));
-            Log.Information($"Response code: {response.StatusCode}, {response.Content}");
-            if (response.IsSuccessful && response.StatusCode !=HttpStatusCode.NotFound)
-            {
-                var data = response.Data;
-                Log.Information($"Postcode:{data.Postcode}, lat:{data.Latitude}, long:{data.Longitude}");
-
-                return data;
-            }
-            else if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                Log.Information($"Postcode lookup for {postcode} not found");
-                return null;
-            }
-            else
-            {
-                Log.Error($"Request failed, response code: {response.StatusCode}, {response.ErrorMessage}");
-                throw new HttpRequestException("Failed to access the postcode lookup service");
-            }
-        }
     }
 
     public class HousePriceLookup : IHousePriceLookup
@@ -116,11 +18,8 @@ namespace HousePrice.Api.Services
         private readonly IMongoContext _mongoContext;
         private readonly IPostcodeLookup _postcodeLookup;
 
-        private IRestClient _lookupClient;
-
         public HousePriceLookup(IHousePriceLookupConfig config)
         {
-            _lookupClient = config.RestClient;
             _mongoContext = config.MongoContext;
             _postcodeLookup = config.PostcodeLookup;
         }
