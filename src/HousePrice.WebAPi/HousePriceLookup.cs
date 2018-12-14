@@ -3,14 +3,13 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using HousePrice.Api.Services;
 using MongoDB.Driver;
-using RestSharp;
 using Serilog;
 
 namespace HousePrice.WebAPi
 {
     public interface IHousePriceLookup
     {
-        Task<PagedResult<WebAPi.HousePrice>> GetLookups(string postcode, double radius);
+        Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius);
     }
 
     public class HousePriceLookup : IHousePriceLookup
@@ -35,34 +34,34 @@ namespace HousePrice.WebAPi
             return result;
         }
 
-        public async Task<PagedResult<WebAPi.HousePrice>> GetLookups(string postcode, double radius)
+        public async Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius)
         {
             Log.Information("Starting retrieval postcode retrieval...");
 
             var postcodeInfo = LogAccessTime(_postcodeLookup.GetByPostcode, postcode, "Postcode lookup of lat and long took {0} milliseconds");
             var timer = Stopwatch.StartNew();
-            if (postcodeInfo?.Longitude != null && postcodeInfo?.Latitude != null)
+            if (postcodeInfo?.Longitude != null && postcodeInfo.Latitude != null)
             {
                 try
                 {
-                    Log.Information($"Sending request to Mongo...");
-                    var list = await _mongoContext.ExecuteAsync<WebAPi.HousePrice, PagedResult<WebAPi.HousePrice>>("Transactions",
+                    Log.Information("Sending request to Mongo...");
+                    var list = await _mongoContext.ExecuteAsync<HousePrice, PagedResult<HousePrice>>("Transactions",
                         async (activeCollection) =>
                     {
                         var locationQuery =
-                            new FilterDefinitionBuilder<WebAPi.HousePrice>().GeoWithinCenterSphere(
+                            new FilterDefinitionBuilder<HousePrice>().GeoWithinCenterSphere(
                                 tag => tag.Location,
                                 postcodeInfo.Longitude.Value,
                                 postcodeInfo.Latitude.Value,
                                 (radius / 1000) / 6371);
 
-                        var sort = new SortDefinitionBuilder<WebAPi.HousePrice>().Descending(x => x.TransferDate);
+                        var sort = new SortDefinitionBuilder<HousePrice>().Descending(x => x.TransferDate);
 
                         var query = activeCollection.Find(locationQuery);
 
-                        var result = new PagedResult<WebAPi.HousePrice>(100, await query.Sort(sort).Skip(0).Limit(25).ToListAsync());
+                        var result = new PagedResult<HousePrice>(100, await query.Sort(sort).Skip(0).Limit(25).ToListAsync());
 
-                        Log.Information($"Request to mongo successful");
+                        Log.Information("Request to mongo successful");
 
                         return result;
 
@@ -79,7 +78,7 @@ namespace HousePrice.WebAPi
                 }
             }
 
-            return new PagedResult<WebAPi.HousePrice>(0, new WebAPi.HousePrice[0]);
+            return new PagedResult<HousePrice>(0, new HousePrice[0]);
         }
     }
 }
