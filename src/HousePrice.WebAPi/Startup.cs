@@ -39,6 +39,7 @@ namespace HousePrice.WebAPi
 
                 return new PostcodeLookupConfig(restClient, Configuration["postcodelookupservicename"]);
             });
+            services.AddScoped<IPostcodeLookup, PostcodeLookup>();
 
             services.AddScoped<IHousePriceLookupConfig, HousePriceLookupConfig>((ctx) => new HousePriceLookupConfig(
                 ctx.GetService<IMongoContext>(), ctx.GetService<IPostcodeLookup>()));
