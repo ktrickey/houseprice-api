@@ -63,6 +63,14 @@ namespace HousePrice.WebAPi
 
             //  app.UseHttpsRedirection();
             app.UseMvc();
+
+            var mongoContext = new MongoContext( new MongoConnection($"mongodb://{Configuration["connectionString"]}",
+                "HousePrice"));
+            Importer.AddIndex(mongoContext);
+            Importer.AddPostcodeIndex(mongoContext);
+            Importer.AddTransferDateIndex(mongoContext);
+
+
         }
     }
 }

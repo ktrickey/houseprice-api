@@ -86,13 +86,10 @@ namespace HousePrice.WebAPi
                     }
                 }
 
-                await AddIndex();
-                await AddPostcodeIndex();
-                await AddTransferDateIndex();
             });
         }
 
-        public async Task AddIndex()
+        public static async Task AddIndex(IMongoContext _mongoContext)
         {
             var housePriceBuilder = Builders<HousePrice>.IndexKeys;
 
@@ -105,14 +102,14 @@ namespace HousePrice.WebAPi
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions",
                 async (collection) =>
                 {
-                    if (!await IndexExists("LocationIndex"))
+                    if (!await IndexExists(_mongoContext, "LocationIndex"))
                     {
                         await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
                     }
                 });
         }
 
-        public async Task AddPostcodeIndex()
+        public static async Task AddPostcodeIndex(IMongoContext _mongoContext)
         {
             var housePriceBuilder = Builders<HousePrice>.IndexKeys;
             var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Ascending(x => x.Postcode),
@@ -121,14 +118,14 @@ namespace HousePrice.WebAPi
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions",
                 async (collection) =>
                 {
-                    if (!await IndexExists("PostcodeIndex"))
+                    if (!await IndexExists(_mongoContext, "PostcodeIndex"))
                     {
                         await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
                     }
                 });
         }
 
-        public async Task AddTransferDateIndex()
+        public static async Task AddTransferDateIndex(IMongoContext _mongoContext)
         {
             var housePriceBuilder = Builders<HousePrice>.IndexKeys;
             var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Ascending(x => x.TransferDate),
@@ -140,14 +137,14 @@ namespace HousePrice.WebAPi
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions",
                 async (collection) =>
                 {
-                    if (!await IndexExists("TransferDateIndex"))
+                    if (!await IndexExists(_mongoContext, "TransferDateIndex"))
                     {
                         await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
                     }
                 });
         }
 
-        private async Task<bool> IndexExists(string indexName)
+        private static async Task<bool> IndexExists(IMongoContext _mongoContext, string indexName)
         {
             return await _mongoContext.ExecuteAsync<HousePrice, bool>("Transactions", async (collection) =>
             {
