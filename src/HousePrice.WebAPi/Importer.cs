@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using HousePrice.Api.Services;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Serilog;
 
@@ -82,34 +85,89 @@ namespace HousePrice.WebAPi
                         await collection.InsertManyAsync(batch);
                     }
                 }
+
+                await AddIndex();
+                await AddPostcodeIndex();
+                await AddTransferDateIndex();
             });
         }
 
         public async Task AddIndex()
         {
             var housePriceBuilder = Builders<HousePrice>.IndexKeys;
-            var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Geo2DSphere(x => x.Location));
+
+            var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Geo2DSphere(x => x.Location),
+                new CreateIndexOptions()
+                {
+                    Name = "LocationIndex"
+                });
 
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions",
-                async (collection) => { await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false); });
+                async (collection) =>
+                {
+                    if (!await IndexExists("LocationIndex"))
+                    {
+                        await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
+                    }
+                });
         }
 
         public async Task AddPostcodeIndex()
         {
             var housePriceBuilder = Builders<HousePrice>.IndexKeys;
-            var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Ascending(x => x.Postcode));
+            var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Ascending(x => x.Postcode),
+                new CreateIndexOptions() {Name = "PostcodeIndex"});
 
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions",
-                async (collection) => { await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false); });
+                async (collection) =>
+                {
+                    if (!await IndexExists("PostcodeIndex"))
+                    {
+                        await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
+                    }
+                });
         }
 
         public async Task AddTransferDateIndex()
         {
             var housePriceBuilder = Builders<HousePrice>.IndexKeys;
-            var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Ascending(x => x.TransferDate));
+            var indexModel = new CreateIndexModel<HousePrice>(housePriceBuilder.Ascending(x => x.TransferDate),
+                new CreateIndexOptions()
+                {
+                    Name = "TransferDateIndex"
+                });
 
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions",
-                async (collection) => { await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false); });
+                async (collection) =>
+                {
+                    if (!await IndexExists("TransferDateIndex"))
+                    {
+                        await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
+                    }
+                });
+        }
+
+        private async Task<bool> IndexExists(string indexName)
+        {
+            return await _mongoContext.ExecuteAsync<HousePrice, bool>("Transactions", async (collection) =>
+            {
+                var collectionManager = collection.Indexes;
+                var indexes = await collectionManager.ListAsync();
+
+                while (indexes.MoveNext())
+                {
+                    var currentIndex = indexes.Current;
+                    foreach (var doc in currentIndex)
+                    {
+                        BsonValue val;
+                        bool ok = doc.TryGetValue("name", out val);
+
+                        if (ok) return true;
+                    }
+                }
+
+                return false;
+            });
         }
     }
 

@@ -62,13 +62,13 @@ namespace HousePrice.WebAPi
         {
             return GetDatabase(databaseName).GetCollection<T>(collection);
         }
-        
+
         public async Task<TOut> ExecuteAsync<TIn, TOut>(string collectionName,Func<IMongoCollection<TIn>, Task<TOut>> func)
         {
             var collection = GetCollection<TIn>(collectionName);
             return await ExecuteAsync(collection, func);
         }
-        
+
         public async Task<TOut> ExecuteAsync<TIn, TOut>(string databaseName, string collectionName,Func<IMongoCollection<TIn>, Task<TOut>> func)
         {
             var collection = GetCollection<TIn>(databaseName,collectionName);
@@ -79,7 +79,7 @@ namespace HousePrice.WebAPi
         {
             return await func(collection);
         }
-        
+
         public async Task<TOut> ExecuteAsync<TOut>(IMongoDatabase database, Func<IMongoDatabase, Task<TOut>> func)
         {
             return await func(database);
