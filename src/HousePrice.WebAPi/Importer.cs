@@ -102,8 +102,10 @@ namespace HousePrice.WebAPi
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions",
                 async (collection) =>
                 {
+                    Log.Information("Checking LocationIndex");
                     if (!await IndexExists(_mongoContext, "LocationIndex"))
                     {
+                        Log.Information("Creating LocationIndex");
                         await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
                     }
                 });
@@ -118,8 +120,10 @@ namespace HousePrice.WebAPi
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions",
                 async (collection) =>
                 {
+                    Log.Information("Checking PostcodeIndex");
                     if (!await IndexExists(_mongoContext, "PostcodeIndex"))
                     {
+                        Log.Information("Creating PostcodeIndex");
                         await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
                     }
                 });
@@ -137,8 +141,10 @@ namespace HousePrice.WebAPi
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions",
                 async (collection) =>
                 {
+                    Log.Information("Checking TransferDateIndex");
                     if (!await IndexExists(_mongoContext, "TransferDateIndex"))
                     {
+                        Log.Information("Creating TransferDateIndex");
                         await collection.Indexes.CreateOneAsync(indexModel).ConfigureAwait(false);
                     }
                 });
