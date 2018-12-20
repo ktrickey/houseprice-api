@@ -1,4 +1,5 @@
-﻿using HousePrice.Api.Services;
+﻿using System.Threading.Tasks;
+using HousePrice.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -66,9 +67,9 @@ namespace HousePrice.WebAPi
 
             var mongoContext = new MongoContext( new MongoConnection($"mongodb://{Configuration["connectionString"]}",
                 "HousePrice"));
-            Importer.AddIndex(mongoContext);
-            Importer.AddPostcodeIndex(mongoContext);
-            Importer.AddTransferDateIndex(mongoContext);
+            Task.Run(async ()=> await Importer.AddIndex(mongoContext));
+            Task.Run(async() => await Importer.AddPostcodeIndex(mongoContext));
+            Task.Run(async() => await Importer.AddTransferDateIndex(mongoContext));
 
 
         }
