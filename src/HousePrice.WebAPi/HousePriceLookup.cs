@@ -54,8 +54,8 @@ namespace HousePrice.WebAPi
 
                         var query = activeCollection.Find(locationQuery);
 
-                        var prices = await query.Sort(sort).Skip(skip).Limit(151).ToListAsync();
-                        var result = new PagedResult<HousePrice>(prices.Count==151, prices.Skip(0).Take(150).ToArray() );
+                        var prices = await query.Sort(sort).Skip(skip).Limit(51).ToListAsync();
+                        var result = new PagedResult<HousePrice>(prices.Count==51, prices.Skip(0).Take(50).ToArray() );
 
                         Log.Information($"Request to mongo successful, retrieved {prices.Count} records");
 
