@@ -23,9 +23,9 @@ namespace HousePrice.WebAPi.Controllers
             _importer = importer;
             _lookup = lookup;
         }
-        [Route("{postcode}/{radius}")]
+        [Route("{postcode}/{radius}/{skip?}")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<HousePrice>>> Get(string postcode, double radius)
+        public async Task<ActionResult<IEnumerable<HousePrice>>> Get(string postcode, double radius, int? skip)
         {
 			Log.Information($"Processing request for {postcode} within {radius} km");
 
@@ -33,7 +33,7 @@ namespace HousePrice.WebAPi.Controllers
             {
                 Log.Information("Directory exists");
             }
-            return Ok(await _lookup.GetLookups(postcode.Replace(" ", string.Empty), radius *1000));
+            return Ok(await _lookup.GetLookups(postcode.Replace(" ", string.Empty), radius *1000,  skip ?? 0));
         }
 
         // POST api/values

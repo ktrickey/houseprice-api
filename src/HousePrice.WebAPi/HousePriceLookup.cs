@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using HousePrice.Api.Services;
 using MongoDB.Driver;
@@ -9,7 +10,7 @@ namespace HousePrice.WebAPi
 {
     public interface IHousePriceLookup
     {
-        Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius);
+        Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius, int skip);
     }
 
     public class HousePriceLookup : IHousePriceLookup
@@ -34,19 +35,13 @@ namespace HousePrice.WebAPi
             return result;
         }
 
-        public async Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius)
+        public async Task<PagedResult<HousePrice>> GetPagedResult(PostcodeData postcodeInfo, double radius, int skip)
         {
-            Log.Information("Starting retrieval postcode retrieval...");
-
-            var postcodeInfo = LogAccessTime(_postcodeLookup.GetByPostcode, postcode, "Postcode lookup of lat and long took {0} milliseconds");
-            var timer = Stopwatch.StartNew();
-            if (postcodeInfo?.Longitude != null && postcodeInfo.Latitude != null)
+            try
             {
-                try
-                {
-                    Log.Information("Sending request to Mongo...");
-                    var list = await _mongoContext.ExecuteAsync<HousePrice, PagedResult<HousePrice>>("Transactions",
-                        async (activeCollection) =>
+                Log.Information("Sending request to Mongo...");
+                var list = await _mongoContext.ExecuteAsync<HousePrice, PagedResult<HousePrice>>("Transactions",
+                    async (activeCollection) =>
                     {
                         var locationQuery =
                             new FilterDefinitionBuilder<HousePrice>().GeoWithinCenterSphere(
@@ -59,26 +54,42 @@ namespace HousePrice.WebAPi
 
                         var query = activeCollection.Find(locationQuery);
 
-                        var result = new PagedResult<HousePrice>(100, await query.Sort(sort).ToListAsync());
+                        var prices = await query.Sort(sort).Skip(skip).Limit(151).ToListAsync();
+                        var result = new PagedResult<HousePrice>(prices.Count==151, prices.Skip(0).Take(150).ToArray() );
 
-                        Log.Information("Request to mongo successful");
+                        Log.Information($"Request to mongo successful, retrieved {prices.Count} records");
 
                         return result;
 
                     });
 
-                    timer.Stop();
 
-                    Log.Information($"Time to get transaction records was {TimeSpan.FromMilliseconds(timer.ElapsedMilliseconds).ToString()}");
-                    return list;
-                }
-                catch (Exception ex)
-                {
-                    Log.Information($"Error occured accessing Mongodb: {ex.Message}");
-                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Log.Information($"Error occured accessing Mongodb: {ex.Message}");
             }
 
-            return new PagedResult<HousePrice>(0, new HousePrice[0]);
+            return new PagedResult<HousePrice>(false, new HousePrice[0]);;
+        }
+
+        public async Task<PagedResult<HousePrice>> GetLookups(string postcode, double radius, int skip)
+        {
+            Log.Information("Starting retrieval postcode retrieval...");
+
+            var postcodeInfo = LogAccessTime(_postcodeLookup.GetByPostcode, postcode, "Postcode lookup of lat and long took {0} milliseconds");
+
+            if (postcodeInfo?.Longitude != null && postcodeInfo.Latitude != null)
+            {
+                var timer = Stopwatch.StartNew();
+                var stuff =  await GetPagedResult(postcodeInfo, radius, skip);
+                Log.Information($"Time to get transaction records was {TimeSpan.FromMilliseconds(timer.ElapsedMilliseconds).ToString()}");
+                return stuff;
+            }
+
+            return new PagedResult<HousePrice>(false, new HousePrice[0]);
         }
     }
 }

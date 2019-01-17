@@ -4,14 +4,14 @@ namespace HousePrice.WebAPi
 {
     public class PagedResult<T>
     {
-        public PagedResult(long totalRows, IEnumerable<T> results)
+        public PagedResult(bool moreAvailable, IEnumerable<T> results)
         {
-            _totalRows = totalRows;
+            _moreAvailable = moreAvailable;
             _results = results;
         }
-        private readonly long _totalRows;
+        private readonly bool _moreAvailable;
         private readonly IEnumerable<T> _results;
-        public long TotalRows => _totalRows;
+        public bool MoreAvailable => _moreAvailable;
         public IEnumerable<T> Results => _results;
     }
 }
