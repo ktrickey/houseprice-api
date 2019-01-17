@@ -59,7 +59,7 @@ namespace HousePrice.WebAPi
 
                         var query = activeCollection.Find(locationQuery);
 
-                        var result = new PagedResult<HousePrice>(100, await query.Sort(sort).Skip(0).Limit(25).ToListAsync());
+                        var result = new PagedResult<HousePrice>(100, await query.Sort(sort).ToListAsync());
 
                         Log.Information("Request to mongo successful");
 
