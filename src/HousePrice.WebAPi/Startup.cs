@@ -24,6 +24,7 @@ namespace HousePrice.WebAPi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options => { options.AddPolicy("AllowAny", builder => builder.AllowAnyOrigin());
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddScoped<IImporter, Importer>();
             services.AddScoped<IHousePriceLookup, HousePriceLookup>();
@@ -48,7 +49,7 @@ namespace HousePrice.WebAPi
             services.AddScoped<IMongoContext, MongoContext>();
             services.AddSingleton(Configuration);
 
-            services.AddCors(options => { options.AddPolicy("AllowAny", builder => builder.AllowAnyOrigin()); });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
