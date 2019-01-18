@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using HousePrice.Api.Services;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Serilog;
@@ -33,7 +30,6 @@ namespace HousePrice.WebAPi
         {
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
             {
-                record.Postcode = record.Postcode.Replace(" ", String.Empty);
                 var locationData = _postcodeLookup.GetByPostcode(record.Postcode);
                 record.Location = locationData?.Latitude != null && locationData?.Longitude != null
                     ? new Location(locationData?.Latitude, locationData?.Longitude)
@@ -41,7 +37,18 @@ namespace HousePrice.WebAPi
 
                 try
                 {
-                    await collection.InsertOneAsync(record);
+                    switch (record.Status)
+                    {
+                        case "A":
+                            await collection.InsertOneAsync(record);
+                            break;
+                        case "C":
+                            //await collection.UpdateOneAsync(x => x.TransactionId == record.TransactionId, record);
+                            break;
+                        case "D":
+                            await collection.DeleteOneAsync(x => x.TransactionId == record.TransactionId);
+                            break;
+                    }
                 }
                 catch (MongoException ex)
                 {
