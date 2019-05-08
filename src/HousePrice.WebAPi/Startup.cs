@@ -27,7 +27,7 @@ namespace HousePrice.WebAPi
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddScoped<IImporter, Importer>();
             services.AddScoped<IHousePriceLookup, HousePriceLookup>();
-            var connection = new MongoConnection($"mongodb://{Configuration["connectionString"]}",
+            var connection = new MongoConnection($"{Configuration["connectionString"]}",
                 "HousePrice");
             services.AddSingleton<IMongoConnection>(connection);
 
@@ -68,7 +68,7 @@ namespace HousePrice.WebAPi
             //  app.UseHttpsRedirection();
             app.UseMvc();
 
-            var mongoContext = new MongoContext( new MongoConnection($"mongodb://{Configuration["connectionString"]}",
+            var mongoContext = new MongoContext( new MongoConnection($"{Configuration["connectionString"]}",
                 "HousePrice"));
             Importer.AddIndex(mongoContext);
             Importer.AddPostcodeIndex(mongoContext);

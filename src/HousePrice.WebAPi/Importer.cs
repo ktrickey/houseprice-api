@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using HousePrice.Api.Services;
 using MongoDB.Bson;
@@ -12,7 +13,7 @@ namespace HousePrice.WebAPi
     public interface IImporter
     {
         Task Import(string name, Stream csvStream);
-        Task Import(HousePrice priceRecord);
+        Task Import(IEnumerable<HousePrice> priceRecord);
     }
 
     public class Importer : IImporter
@@ -26,29 +27,44 @@ namespace HousePrice.WebAPi
             _postcodeLookup = postcodeLookup;
         }
 
-        public async Task Import(HousePrice record)
+        public async Task Import(IEnumerable<HousePrice> records)
         {
             await _mongoContext.ExecuteActionAsync<HousePrice>("Transactions", async (collection) =>
             {
-                var locationData = _postcodeLookup.GetByPostcode(record.Postcode);
-                record.Location = locationData?.Latitude != null && locationData?.Longitude != null
-                    ? new Location(locationData?.Latitude, locationData?.Longitude)
-                    : null;
+                var recordList = records.ToList();
+
+                var locations = recordList.Select(r=>r.Postcode.Replace(" ", string.Empty)).Distinct().Select(r => _postcodeLookup.GetByPostcode(r))
+                    .ToDictionary(r=>r.Postcode);
+
+                foreach (var record in recordList)
+                {
+                    var locationData = locations[record.Postcode];
+                    record.Location = locationData?.Latitude != null && locationData?.Longitude != null
+                        ? new Location(locationData?.Latitude, locationData?.Longitude)
+                        : null;
+                }
+
+                var adds = recordList.Where(r => r.Status == "A");
+                var deletes = recordList.Where(r => r.Status == "D").Select(d=>d.TransactionId);
 
                 try
                 {
-                    switch (record.Status)
-                    {
-                        case "A":
-                            await collection.InsertOneAsync(record);
-                            break;
-                        case "C":
-                            //await collection.UpdateOneAsync(x => x.TransactionId == record.TransactionId, record);
-                            break;
-                        case "D":
-                            await collection.DeleteOneAsync(x => x.TransactionId == record.TransactionId);
-                            break;
-                    }
+                    await collection.InsertManyAsync(adds);
+                    await collection.DeleteManyAsync(x=>deletes.Contains(x.TransactionId));
+
+
+//                    switch (record.Status)
+//                    {
+//                        case "A":
+//                            await collection.InsertOneAsync(record);
+//                            break;
+//                        case "C":
+//                            //await collection.UpdateOneAsync(x => x.TransactionId == record.TransactionId, record);
+//                            break;
+//                        case "D":
+//                            await collection.DeleteOneAsync(x => x.TransactionId == record.TransactionId);
+//                            break;
+//                    }
                 }
                 catch (MongoException ex)
                 {
