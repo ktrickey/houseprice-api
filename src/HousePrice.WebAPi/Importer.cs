@@ -38,7 +38,7 @@ namespace HousePrice.WebAPi
 
                 foreach (var record in recordList)
                 {
-                    var locationData = locations[record.Postcode];
+                    var locationData =  locations[record.Postcode];
                     record.Location = locationData?.Latitude != null && locationData?.Longitude != null
                         ? new Location(locationData?.Latitude, locationData?.Longitude)
                         : null;
