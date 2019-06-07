@@ -2,7 +2,7 @@
 //using System;
 //using Xunit;
 //
-//namespace CleanArchitecture.Tests.Integration.Data
+//namespace HousePrice.Api.Tests.Integration.Data
 //{
 //    public class EfRepositoryDelete : BaseEfRepoTestFixture
 //    {

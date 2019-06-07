@@ -8,7 +8,7 @@
 //using Microsoft.Extensions.Logging;
 //using System;
 //
-//namespace CleanArchitecture.Tests.Integration.Web
+//namespace HousePrice.Api.Tests.Integration.Web
 //{
 //    public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<Startup>
 //    {

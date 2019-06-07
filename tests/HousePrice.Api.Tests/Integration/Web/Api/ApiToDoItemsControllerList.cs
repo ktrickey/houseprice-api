@@ -7,7 +7,7 @@
 //using System.Threading.Tasks;
 //using Xunit;
 //
-//namespace CleanArchitecture.Tests.Integration.Web.Api
+//namespace HousePrice.Api.Tests.Integration.Web.Api
 //{
 //    public class ApiToDoItemsControllerList : IClassFixture<CustomWebApplicationFactory<Startup>>
 //    {

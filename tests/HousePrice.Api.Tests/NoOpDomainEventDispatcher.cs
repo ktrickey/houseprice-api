@@ -1,7 +1,7 @@
 ﻿using HousePrice.Api.Core.Interfaces;
 using HousePrice.Api.Core.SharedKernel;
 
-namespace CleanArchitecture.Tests
+namespace HousePrice.Api.Tests
 {
     public class NoOpDomainEventDispatcher : IDomainEventDispatcher
     {

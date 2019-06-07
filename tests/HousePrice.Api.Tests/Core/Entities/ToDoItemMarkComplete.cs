@@ -2,7 +2,7 @@
 //using System.Linq;
 //using Xunit;
 //
-//namespace CleanArchitecture.Tests.Core.Entities
+//namespace HousePrice.Api.Tests.Core.Entities
 //{
 //    public class ToDoItemMarkComplete
 //    {

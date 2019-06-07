@@ -3,7 +3,7 @@
 //using System.Threading.Tasks;
 //using Xunit;
 //
-//namespace CleanArchitecture.Tests.Integration.Web
+//namespace HousePrice.Api.Tests.Integration.Web
 //{
 //    public class HomeControllerIndex : IClassFixture<CustomWebApplicationFactory<Startup>>
 //    {

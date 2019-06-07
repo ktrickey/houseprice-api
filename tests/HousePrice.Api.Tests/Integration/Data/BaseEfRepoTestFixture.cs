@@ -4,7 +4,7 @@
 //using Microsoft.Extensions.DependencyInjection;
 //using Moq;
 //
-//namespace CleanArchitecture.Tests.Integration.Data
+//namespace HousePrice.Api.Tests.Integration.Data
 //{
 //    public abstract class BaseEfRepoTestFixture
 //    {
