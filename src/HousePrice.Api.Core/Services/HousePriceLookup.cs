@@ -15,27 +15,16 @@ namespace HousePrice.Api.Core.Services
     public class HousePriceLookup : IHousePriceLookup
     {
 
-        private readonly IRepository _mongoContext;
+        private readonly IRepository _mongoRepository;
         private readonly IPostcodeLookup _postcodeLookup;
 
-        public HousePriceLookup(IHousePriceLookupConfig config)
+        public HousePriceLookup(IRepository mongoRepository, IPostcodeLookup postcodeLookup)
         {
-            _mongoContext = config.MongoContext;
-            _postcodeLookup = config.PostcodeLookup;
+            _mongoRepository = mongoRepository;
+            _postcodeLookup = postcodeLookup;
         }
 
-//        private T2 LogAccessTime<T1, T2>( Func<T1, T2> funcToTime, T1 arg, string logString)
-//        {
-//            var stopWatch = Stopwatch.StartNew();
-//            var result = funcToTime(arg);
-//            stopWatch.Stop();
-//            var elapsed = stopWatch.ElapsedMilliseconds;
-//            //Log.Information(string.Format(logString, elapsed.ToString()));
-//
-//            return result;
-//        }
-
-        public async Task<PagedResult<HousePriceTransaction>> GetPagedResult( PostcodeData postcodeInfo, double radius, int skip)
+        private async Task<PagedResult<HousePriceTransaction>> GetPagedResult( PostcodeData postcodeInfo, double radius, int skip)
         {
             try
             {
@@ -43,7 +32,7 @@ namespace HousePrice.Api.Core.Services
 
                var location = new LocationFilter(new Location(postcodeInfo.Latitude, postcodeInfo.Longitude), radius );
 
-               return await _mongoContext.FindWithinArea<HousePriceTransaction>(location, x => x.TransferDate, skip);
+               return await _mongoRepository.FindWithinArea<HousePriceTransaction>(location, x => x.TransferDate, skip);
 
             }
             catch (Exception ex)
