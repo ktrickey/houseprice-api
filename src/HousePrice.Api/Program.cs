@@ -1,6 +1,8 @@
 ﻿using HousePrice.Api;
+using HousePrice.Infrastructure;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Serilog;
 
 namespace CleanArchitecture.Web
 {
@@ -13,6 +15,7 @@ namespace CleanArchitecture.Web
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseLogging()
                 .UseStartup<Startup>();
     }
 }

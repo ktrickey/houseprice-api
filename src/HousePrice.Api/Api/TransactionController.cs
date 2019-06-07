@@ -6,6 +6,7 @@ using HousePrice.Api.ApiModels;
 using HousePrice.Api.Core.Entities;
 using HousePrice.Api.Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace HousePrice.Api.Api
 {
@@ -13,21 +14,23 @@ namespace HousePrice.Api.Api
     {
         private readonly IImporter _importer;
         private readonly IHousePriceLookup _lookup;
+        private readonly ILogger<TransactionController> _logger;
 
-        public TransactionController(IImporter importer, IHousePriceLookup lookup)
+        public TransactionController(IImporter importer, IHousePriceLookup lookup, ILogger<TransactionController> logger)
         {
             _importer = importer;
             _lookup = lookup;
+            _logger = logger;
         }
         [Route("{postcode}/{radius}/{skip?}")]
         [HttpGet]
         public async Task<ActionResult<HousePriceList>> Get(string postcode, double radius, int? skip)
         {
-			//Log.Information($"Processing request for {postcode} within {radius} km");
+			_logger.LogInformation($"Processing request for {postcode} within {radius} km");
 
             if (Directory.Exists("/data/postcodes"))
             {
-                //Log.Information("Directory exists");
+                _logger.LogInformation("Directory exists");
             }
 
             var results = await _lookup.GetLookups(postcode.Replace(" ", string.Empty), radius * 1000, skip ?? 0);
@@ -63,7 +66,7 @@ namespace HousePrice.Api.Api
         [HttpPost]
         public async void Post(IEnumerable<HousePriceTransaction> transactions)
         {
-            //Log.Information("In Post multiple");
+            _logger.LogInformation("In Post multiple");
 
             try
             {
