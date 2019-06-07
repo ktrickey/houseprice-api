@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace CleanArchitecture.Web.Api
+namespace HousePrice.Api.Api
 {
     [Route("api/[controller]")]
     [ApiController]

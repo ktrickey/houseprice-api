@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using CleanArchitecture.Web.Api;
 using HousePrice.Api.ApiModels;
 using HousePrice.Api.Core.Entities;
 using HousePrice.Api.Core.Services;

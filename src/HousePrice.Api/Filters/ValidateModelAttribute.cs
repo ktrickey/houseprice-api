@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace CleanArchitecture.Web.Filters
+namespace HousePrice.Api.Filters
 {
     public class ValidateModelAttribute : ActionFilterAttribute
     {
