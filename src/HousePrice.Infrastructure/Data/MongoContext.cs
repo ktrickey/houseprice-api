@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace HousePrice.Infrastructure.Data
@@ -33,12 +34,14 @@ namespace HousePrice.Infrastructure.Data
 
     public class MongoContext : IMongoContext
     {
+        internal readonly ILogger<MongoContext> _logger;
 
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
 
-        public MongoContext(IMongoConnection connection)
+        public MongoContext(IMongoConnection connection, ILogger<MongoContext> logger)
         {
+            _logger = logger;
             _client = GetClient(connection.ConnectionString);
             _database = GetDatabase(connection.DatabaseName);
         }
