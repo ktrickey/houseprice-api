@@ -1,21 +1,23 @@
-﻿using HousePrice.Api;
-using HousePrice.Infrastructure;
+﻿using HousePrice.Infrastructure;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Serilog;
 
-namespace CleanArchitecture.Web
+namespace HousePrice.Api
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+        private static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseLogging()
+                .UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
+                    .ReadFrom.Configuration(hostingContext.Configuration)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console())
                 .UseStartup<Startup>();
     }
 }
