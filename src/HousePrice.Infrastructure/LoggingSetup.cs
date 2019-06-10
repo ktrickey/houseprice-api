@@ -17,17 +17,17 @@ namespace HousePrice.Infrastructure
         /// logger is not specified but <paramref name="dispose" /> is true, the <see cref="M:Serilog.Log.CloseAndFlush" /> method will be
         /// called on the static <see cref="T:Serilog.Log" /> class instead.</param>
         /// <returns>The web host builder.</returns>
-        public static IWebHostBuilder UseLogging(
-            this IWebHostBuilder builder,
-            ILogger logger = null,
-            bool dispose = false)
-        {
-            if (builder == null)
-                throw new ArgumentNullException(nameof(builder));
-            builder.ConfigureServices((Action<IServiceCollection>) (collection =>
-                collection.AddSingleton<ILoggerFactory>((Func<IServiceProvider, ILoggerFactory>) (services =>
-                    (ILoggerFactory) new SerilogLoggerFactory(logger, dispose)))));
-            return builder;
-        }
+//        public static IWebHostBuilder UseLogging(
+//            this IWebHostBuilder builder,
+//            ILogger logger = null,
+//            bool dispose = false)
+//        {
+//            if (builder == null)
+//                throw new ArgumentNullException(nameof(builder));
+//            builder.ConfigureServices((Action<IServiceCollection>) (collection =>
+//                collection.AddSingleton<ILoggerFactory>((Func<IServiceProvider, ILoggerFactory>) (services =>
+//                    (ILoggerFactory) new SerilogLoggerFactory(logger, dispose)))));
+//            return builder;
+//        }
     }
 }
