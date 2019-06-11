@@ -22,15 +22,15 @@ namespace HousePrice.Infrastructure.Data
             _restClient.BaseUrl = new Uri(rootUrl);
         }
 
-        public async Task<PostcodeData> GetPostcode(string postcode)
+        public async Task<IPostcodeData> GetPostcode(string postcode)
         {
-            var response = await _restClient.ExecuteGetTaskAsync<PostcodeData>(
+            var response = await _restClient.ExecuteGetTaskAsync<IPostcodeData>(
                 new RestRequest($"{WebUtility.UrlEncode(postcode)}"));
             _logger.LogInformation($"Response code: {response.StatusCode}, {response.Content}");
             if (response.IsSuccessful && response.StatusCode !=HttpStatusCode.NotFound)
             {
                 var data = response.Data;
-                _logger.LogInformation($"Postcode:{data.Postcode}, lat:{data.Latitude}, long:{data.Longitude}");
+                _logger.LogInformation($"Postcode:{data.Postcode}, lat:{data.Location.Latitude}, long:{data.Location.Longitude}");
 
                 return data;
             }

@@ -1,13 +1,13 @@
 using System;
 using HousePrice.Api.Core.Interfaces;
-using HousePrice.Api.Core.SharedKernel;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace HousePrice.Api.Core.Entities
+namespace HousePrice.Infrastructure.Data.DTOs
 {
-    // ReSharper disable once ClassNeverInstantiated.Global
-    public sealed class HousePriceTransaction: MongoEntity, IGeoEntity
+    public class HousePriceTransactionDto
     {
+        [BsonId]
+        public string TransactionId { get; set; }
         public double Price { get; set; }
         public DateTime TransferDate { get; set; }
         public string Postcode { get; set; }
@@ -23,6 +23,6 @@ namespace HousePrice.Api.Core.Entities
         public string County { get; set; }
         public string CategoryType { get; set; }
         public string Status { get; set; }
-        public ILocation Location { get; set; }
+        public ILocation GeoLocation { get; set; }
     }
 }

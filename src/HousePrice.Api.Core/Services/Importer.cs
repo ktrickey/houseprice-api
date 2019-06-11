@@ -15,7 +15,7 @@ namespace HousePrice.Api.Core.Services
         Task Import(IEnumerable<HousePriceTransaction> priceRecord);
     }
 
-    public class Importer : IImporter
+    internal class Importer : IImporter
     {
         private readonly IRepository _mongoRepository;
         private readonly IPostcodeLookup _postcodeLookup;
@@ -32,7 +32,7 @@ namespace HousePrice.Api.Core.Services
 
                 var uniquePostcodes = recordList.Select(r => r.Postcode.Replace(" ", string.Empty)).Distinct().ToArray();
 
-                var locations = new Dictionary<string, PostcodeData>(uniquePostcodes.Length);
+                var locations = new Dictionary<string, IPostcodeData>(uniquePostcodes.Length);
 
                 foreach (var postcode in uniquePostcodes)
                 {
@@ -44,9 +44,7 @@ namespace HousePrice.Api.Core.Services
                 foreach (var record in recordList)
                 {
                     var locationData =  locations[record.Postcode];
-                    record.Location = locationData?.Latitude != null && locationData?.Longitude != null
-                        ? new Location(locationData?.Latitude, locationData?.Longitude)
-                        : null;
+                    record.Location = new Location(locationData.Location.Latitude, locationData.Location.Longitude);
                 }
 
                 var adds = recordList.Where(r => r.Status == "A");

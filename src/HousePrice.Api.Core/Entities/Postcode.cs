@@ -3,12 +3,18 @@ using HousePrice.Api.Core.Interfaces;
 
 namespace HousePrice.Api.Core.Entities
 {
+    public interface IPostcodeData
+    {
+        long Id { get; set; }
+        string Postcode { get; set; }
+        ILocation Location { get; set; }
+    }
+
     [Serializable]
-    public class PostcodeData: ILocation
+    internal class PostcodeData : IPostcodeData
     {
         public long Id { get; set; }
         public string Postcode {get; set; }
-        public double? Latitude { get; set; }
-        public double? Longitude { get; set; }
+        public ILocation Location { get; set; }
     }
 }

@@ -4,12 +4,12 @@ using HousePrice.Api.Core.Interfaces;
 
 namespace HousePrice.Api.Core.Services
 {
-    public interface IPostcodeLookup
+    internal interface IPostcodeLookup
     {
-        Task<PostcodeData> GetByPostcode(string postcode);
+        Task<IPostcodeData> GetByPostcode(string postcode);
     }
 
-    public class PostcodeLookup : IPostcodeLookup
+    internal class PostcodeLookup : IPostcodeLookup
     {
         private readonly IPostcodeRepository _postcodeRepo;
 
@@ -18,7 +18,7 @@ namespace HousePrice.Api.Core.Services
             _postcodeRepo = postcodeRepo;
 
         }
-        public async Task<PostcodeData> GetByPostcode(string postcode)
+        public async Task<IPostcodeData> GetByPostcode(string postcode)
         {
             return await _postcodeRepo.GetPostcode(postcode);
 

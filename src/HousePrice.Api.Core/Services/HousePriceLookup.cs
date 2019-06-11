@@ -13,7 +13,7 @@ namespace HousePrice.Api.Core.Services
         Task<PagedResult<HousePriceTransaction>> GetLookups(string postcode, double radius, int skip);
     }
 
-    public class HousePriceLookup : IHousePriceLookup
+    internal class HousePriceLookup : IHousePriceLookup
     {
 
         private readonly IRepository _mongoRepository;
@@ -27,13 +27,13 @@ namespace HousePrice.Api.Core.Services
             _logger = logger;
         }
 
-        private async Task<PagedResult<HousePriceTransaction>> GetPagedResult( PostcodeData postcodeInfo, double radius, int skip)
+        private async Task<PagedResult<HousePriceTransaction>> GetPagedResult( IPostcodeData postcodeInfo, double radius, int skip)
         {
             try
             {
                 _logger.LogInformation("Sending request to Mongo...");
 
-               var location = new LocationFilter(new Location(postcodeInfo.Latitude, postcodeInfo.Longitude), radius );
+               var location = new LocationFilter(new Location((double)postcodeInfo.Location.Latitude, (double)postcodeInfo.Location.Longitude), radius );
 
                return await _mongoRepository.FindWithinArea<HousePriceTransaction>(location, x => x.TransferDate, skip);
 
@@ -52,7 +52,7 @@ namespace HousePrice.Api.Core.Services
 
             var postcodeInfo = await _postcodeLookup.GetByPostcode( postcode);
 
-            if (postcodeInfo?.Longitude != null && postcodeInfo.Latitude != null)
+            if (postcodeInfo.Location.Longitude != null && postcodeInfo.Location.Latitude != null)
             {
                 var timer = Stopwatch.StartNew();
                 var stuff =  await GetPagedResult(postcodeInfo, radius, skip);

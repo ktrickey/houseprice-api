@@ -22,7 +22,7 @@ namespace HousePrice.Infrastructure.Data
             _dbContext = dbContext;
         }
 
-        public async Task<T> GetById<T>(string id) where T : MongoEntity
+        public async Task<T> GetById<T>(string id) where T : IMongoEntity
         {
             return await  _dbContext.ExecuteAsync<T, T>(typeof(T).Name,
                 async (activeCollection) =>
@@ -33,7 +33,7 @@ namespace HousePrice.Infrastructure.Data
         }
 
  
-        public async Task<T> Add<T>(T entity) where T : MongoEntity
+        public async Task<T> Add<T>(T entity) where T : IMongoEntity
         {
             await _dbContext.ExecuteActionAsync<T>(typeof(T).Name, async (activeCollection) =>
                 {
@@ -43,7 +43,7 @@ namespace HousePrice.Infrastructure.Data
             return entity;
         }
 
-        public async Task Delete<T>(T entity) where T : MongoEntity
+        public async Task Delete<T>(T entity) where T : IMongoEntity
         {
             await _dbContext.ExecuteActionAsync<T>(typeof(T).Name, async (activeCollection) =>
             {
@@ -51,7 +51,7 @@ namespace HousePrice.Infrastructure.Data
             });
         }
 
-        public async Task DeleteMany<T>(IEnumerable<T> entities) where T : MongoEntity
+        public async Task DeleteMany<T>(IEnumerable<T> entities) where T : IMongoEntity
         {
             await _dbContext.ExecuteActionAsync<T>(typeof(T).Name, async (activeCollection) =>
             {
@@ -59,7 +59,7 @@ namespace HousePrice.Infrastructure.Data
             });
         }
 
-        public async Task InsertMany<T>(IEnumerable<T> entities) where T : MongoEntity
+        public async Task InsertMany<T>(IEnumerable<T> entities) where T : IMongoEntity
         {
             await _dbContext.ExecuteActionAsync<T>(typeof(T).Name, async (activeCollection) =>
             {
@@ -67,7 +67,7 @@ namespace HousePrice.Infrastructure.Data
             });
         }
 
-        public async Task Update<T>(T entity) where T : MongoEntity
+        public async Task Update<T>(T entity) where T : IMongoEntity
         {
             await _dbContext.ExecuteActionAsync<T>(typeof(T).Name, async (activeCollection) =>
             {
@@ -81,9 +81,9 @@ namespace HousePrice.Infrastructure.Data
             return await _dbContext.ExecuteAsync<T, PagedResult<T>>(typeof(T).Name, async (activeCollection) =>
             {
                 var filterDef = new FilterDefinitionBuilder<T>().GeoWithinCenterSphere(
-                    tag => tag.GeoLocation,
-                    filter.Location.Longitude.Value,
-                    filter.Location.Latitude.Value,
+                    tag => tag.Location,
+                    filter.Location.Longitude,
+                    filter.Location.Latitude,
                     (filter.Radius / 1000) / 6371);
                 var set = await activeCollection.FindAsync<T>(filterDef);
 

@@ -8,7 +8,7 @@ namespace HousePrice.Api.Core.Entities
     {
         public HousePriceMap()
         {
-            Map( m => m.TransactionId ).Index(0);
+            Map( m => m.Id ).Index(0);
             Map( m => m.Price ).Index(1);
             Map( m => m.TransferDate ).Index(2).TypeConverterOption.Format("dd/MM/yyyy hh:mm:ss");
             Map( m => m.Postcode ).Index(3);

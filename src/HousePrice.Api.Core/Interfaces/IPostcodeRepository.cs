@@ -5,7 +5,7 @@ namespace HousePrice.Api.Core.Interfaces
 {
     public interface IPostcodeRepository
     {
-        Task<PostcodeData> GetPostcode(string postcode);
+        Task<IPostcodeData> GetPostcode(string postcode);
     }
 
 }
