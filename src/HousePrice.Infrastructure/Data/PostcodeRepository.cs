@@ -18,7 +18,7 @@ namespace HousePrice.Infrastructure.Data
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
 
-        public ILocation Location => Latitude != null && Longitude != null ? new Location(Latitude.Value, Longitude.Value) : null;
+        public ILocation Location => Latitude != null && Longitude != null ? new HousePrice.Api.Core.Entities.Location(Latitude.Value, Longitude.Value) : null;
     }
 
 

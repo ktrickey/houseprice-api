@@ -2,7 +2,7 @@ using HousePrice.Api.Core.Interfaces;
 
 namespace HousePrice.Api.Core.Entities
 {
-    internal class Location: ILocation
+    public class Location: ILocation
     {
         public Location(double latitude, double longitude)
         {

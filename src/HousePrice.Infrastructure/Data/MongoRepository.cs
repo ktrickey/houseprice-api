@@ -13,7 +13,18 @@ using MongoDB.Driver;
 
 namespace HousePrice.Infrastructure.Data
 {
-    public class MongoRepository : IRepository
+    public class TransactionRepository : MongoRepository<HousePriceTransaction>
+    {
+        public TransactionRepository(IMongoContext dbContext) : base(dbContext)
+        {
+            
+        }
+        
+        
+    }
+    
+    
+    public abstract class MongoRepository<T> : IRepository where T :  MongoEntity
     {
         private readonly IMongoContext _dbContext;
 
@@ -22,7 +33,7 @@ namespace HousePrice.Infrastructure.Data
             _dbContext = dbContext;
         }
 
-        public async Task<T> GetById<T>(string id) where T :  IMongoEntity
+        public async Task<T> GetById(string id)
         {
             return await  _dbContext.ExecuteAsync<T, T>(typeof(T).Name,
                 async (activeCollection) =>
@@ -33,7 +44,7 @@ namespace HousePrice.Infrastructure.Data
         }
 
  
-        public async Task<T> Add<T>(T entity) where T : IMongoEntity
+        public async Task<T> Add<T>(T entity) where T : MongoEntity
         {
             await _dbContext.ExecuteActionAsync<T>(typeof(T).Name, async (activeCollection) =>
                 {
@@ -43,7 +54,7 @@ namespace HousePrice.Infrastructure.Data
             return entity;
         }
 
-        public async Task Delete<T>(T entity) where T : IMongoEntity
+        public async Task Delete<T>(T entity) where T : MongoEntity
         {
             await _dbContext.ExecuteActionAsync<T>(typeof(T).Name, async (activeCollection) =>
             {
@@ -51,7 +62,7 @@ namespace HousePrice.Infrastructure.Data
             });
         }
 
-        public async Task DeleteMany<T>(IEnumerable<T> entities) where T : IMongoEntity
+        public async Task DeleteMany<T>(IEnumerable<T> entities) where T : MongoEntity
         {
             await _dbContext.ExecuteActionAsync<T>(typeof(T).Name, async (activeCollection) =>
             {
@@ -59,7 +70,7 @@ namespace HousePrice.Infrastructure.Data
             });
         }
 
-        public async Task InsertMany<T>(IEnumerable<T> entities) where T : IMongoEntity
+        public async Task InsertMany<T>(IEnumerable<T> entities) where T : MongoEntity
         {
             await _dbContext.ExecuteActionAsync<T>(typeof(T).Name, async (activeCollection) =>
             {
@@ -67,7 +78,7 @@ namespace HousePrice.Infrastructure.Data
             });
         }
 
-        public async Task Update<T>(T entity) where T : IMongoEntity
+        public async Task Update<T>(T entity) where T : MongoEntity
         {
             await _dbContext.ExecuteActionAsync<T>(typeof(T).Name, async (activeCollection) =>
             {
