@@ -5,9 +5,9 @@ namespace HousePrice.Api.Core.Entities
 {
     public interface IPostcodeData
     {
-        long Id { get; set; }
-        string Postcode { get; set; }
-        ILocation Location { get; set; }
+        long Id { get; }
+        string Postcode { get; }
+        ILocation Location { get; }
     }
 
     [Serializable]

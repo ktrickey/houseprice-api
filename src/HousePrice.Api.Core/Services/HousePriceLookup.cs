@@ -52,7 +52,7 @@ namespace HousePrice.Api.Core.Services
 
             var postcodeInfo = await _postcodeLookup.GetByPostcode( postcode);
 
-            if (postcodeInfo.Location.Longitude != null && postcodeInfo.Location.Latitude != null)
+            if (postcodeInfo.Location != null)
             {
                 var timer = Stopwatch.StartNew();
                 var stuff =  await GetPagedResult(postcodeInfo, radius, skip);

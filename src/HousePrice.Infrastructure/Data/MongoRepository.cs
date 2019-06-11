@@ -22,7 +22,7 @@ namespace HousePrice.Infrastructure.Data
             _dbContext = dbContext;
         }
 
-        public async Task<T> GetById<T>(string id) where T : IMongoEntity
+        public async Task<T> GetById<T>(string id) where T :  IMongoEntity
         {
             return await  _dbContext.ExecuteAsync<T, T>(typeof(T).Name,
                 async (activeCollection) =>
